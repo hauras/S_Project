@@ -3,8 +3,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GameplayTagContainer.h"
 #include "SPlayerController.generated.h"
 
+class UInputAction;
+class USAbilitySystemComponent;
 class UInputMappingContext;
 class USInputConfig;
 class USInputComponent;
@@ -31,6 +34,21 @@ private:
 	void Move_Input(const FInputActionValue& InputAction);
 	void Look_Input(const FInputActionValue& InputAction);
 
+	UPROPERTY(EditAnywhere, Category="Input")
+	TObjectPtr<UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, Category="Input")
+	TObjectPtr<UInputAction> LookAction;
+	
 	UPROPERTY()
 	TObjectPtr<USInputComponent> MyInputComponent;
+
+	UPROPERTY()
+	TObjectPtr<USAbilitySystemComponent> SAbilitySystemComponent;
+	
+	USAbilitySystemComponent* GetASC();
+
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
+	void AbilityInputTagHeld(FGameplayTag InputTag);
 };

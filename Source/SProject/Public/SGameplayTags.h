@@ -12,7 +12,9 @@ public:
 
 	FGameplayTag InputTag_Move;
 	FGameplayTag InputTag_Look;
+	FGameplayTag InputTag_BasicAttack;
 
+	FGameplayTag Ability_BasicAttack;
 private:
 	static FSGameplayTags GameplayTags;
 };

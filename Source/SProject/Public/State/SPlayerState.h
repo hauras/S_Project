@@ -2,38 +2,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "GameFramework/PlayerState.h"
 #include "AbilitySystemInterface.h"
-#include "CharacterBase.generated.h"
+#include "SPlayerState.generated.h"
 
-class UGameplayAbility;
 class UAbilitySystemComponent;
 class UAttributeSet;
-
+/**
+ * 
+ */
 UCLASS()
-class SPROJECT_API ACharacterBase : public ACharacter, public IAbilitySystemInterface
+class SPROJECT_API ASPlayerState : public APlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
-
 public:
-	ACharacterBase();
-
+	ASPlayerState();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 protected:
-	virtual void BeginPlay() override;
-
+	
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
-
-	void AddCharacterAbilities();
-private:
-
-	UPROPERTY(EditAnywhere, Category = "Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
-
-
 };

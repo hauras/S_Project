@@ -15,19 +15,36 @@ class SPROJECT_API USInputComponent : public UEnhancedInputComponent
 	GENERATED_BODY()
 public:
 
-	template<class UserObject,typename CallbackFunc>
-	void BindInputAction(const USInputConfig* InputConfig, const FGameplayTag& InputTag, ETriggerEvent TriggerEvent,UserObject* ContextObject,CallbackFunc Func);
-
+	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType, typename HeldFuncType>
+	void BindAbilityActions(const USInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, HeldFuncType HeldFunc);
 };
 
-template <class UserObject, typename CallbackFunc>
-void USInputComponent::BindInputAction(const USInputConfig* InputConfig, const FGameplayTag& InputTag,
-	ETriggerEvent TriggerEvent, UserObject* ContextObject, CallbackFunc Func)
+template <class UserClass, typename PressedFuncType, typename ReleasedFuncType, typename HeldFuncType>
+void USInputComponent::BindAbilityActions(const USInputConfig* InputConfig, UserClass* Object,
+	PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, HeldFuncType HeldFunc)
 {
-	checkf(InputConfig,TEXT("Input config data asset is null,can not proceed with binding"));
+	check(InputConfig);
 
-	if (UInputAction* FoundAction = InputConfig->FindNativeInputActionByTag(InputTag))
+	for (const FSInputActionConfig& Action : InputConfig->InputActions )
 	{
-		BindAction(FoundAction,TriggerEvent,ContextObject,Func);
+		if (Action.InputAction && Action.InputTag.IsValid())
+		{
+			if (PressedFunc)
+			{
+				BindAction(Action.InputAction, ETriggerEvent::Started, Object, PressedFunc, Action.InputTag);
+			}
+
+			if (ReleasedFunc)
+			{
+				BindAction(Action.InputAction, ETriggerEvent::Completed, Object, ReleasedFunc, Action.InputTag);
+			}
+
+			if (HeldFunc)
+			{
+				BindAction(Action.InputAction, ETriggerEvent::Triggered, Object, HeldFunc, Action.InputTag);
+			}
+		}
 	}
 }
+
+

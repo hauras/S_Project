@@ -8,5 +8,10 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 {
 	GameplayTags.InputTag_Move = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Move"), FString("Move"));
 	GameplayTags.InputTag_Look = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Look"), FString("Look"));
+	GameplayTags.InputTag_BasicAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.BasicAttack"), FString("Input_Attack"));
+
+
+
+	GameplayTags.Ability_BasicAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.BasicAttack"), FString("BasicAttack"));
 
 }

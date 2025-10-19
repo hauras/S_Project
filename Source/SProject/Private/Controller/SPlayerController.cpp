@@ -4,6 +4,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "Input/SInputComponent.h" // 커스텀 입력 컴포넌트
 #include "SGameplayTags.h" // GameplayTag를 사용하기 위해
+#include "Ability/SAbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 ASPlayerController::ASPlayerController()
 {
@@ -28,8 +30,9 @@ void ASPlayerController::SetupInputComponent()
 	MyInputComponent = CastChecked<USInputComponent>(InputComponent);
 
 	// 바인딩 로직: 컨트롤러의 콜백 함수와 연결합니다.
-	MyInputComponent->BindInputAction(InputConfig, FSGameplayTags::Get().InputTag_Move, ETriggerEvent::Triggered, this, &ASPlayerController::Move_Input);
-	MyInputComponent->BindInputAction(InputConfig, FSGameplayTags::Get().InputTag_Look, ETriggerEvent::Triggered, this, &ASPlayerController::Look_Input);
+	MyInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASPlayerController::Move_Input);
+	MyInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASPlayerController::Look_Input);
+	MyInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 
 }
 
@@ -63,3 +66,41 @@ void ASPlayerController::Look_Input(const FInputActionValue& InputAction)
 		AddPitchInput(LookAxisVector.Y);
 	}
 }
+
+USAbilitySystemComponent* ASPlayerController::GetASC()
+{
+	if (SAbilitySystemComponent == nullptr)
+	{
+		SAbilitySystemComponent = Cast<USAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	}
+	return SAbilitySystemComponent;
+}
+
+void ASPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	// [검문소 1] 컨트롤러가 입력을 받았는지 확인
+	UE_LOG(LogTemp, Error, TEXT("DEBUG: 1. [Controller] Input Pressed! Tag: %s"), *InputTag.ToString());
+
+	if (GetASC())
+	{
+		GetASC()->AbilityInputTagPressed(InputTag);
+	}
+	else
+	{
+		// ASC를 못 찾았으면 여기서 신호가 죽은 겁니다.
+		UE_LOG(LogTemp, Error, TEXT("DEBUG: [Controller] Error! Could not find ASC!"));
+	}
+}
+
+void ASPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	if (GetASC() == nullptr) return;
+	GetASC()->AbilityInputTagReleased(InputTag);
+}
+
+void ASPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
+{
+	if (GetASC() == nullptr) return;
+	GetASC()->AbilityInputTagHeld(InputTag);
+}
+
