@@ -78,18 +78,9 @@ USAbilitySystemComponent* ASPlayerController::GetASC()
 
 void ASPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	// [검문소 1] 컨트롤러가 입력을 받았는지 확인
-	UE_LOG(LogTemp, Error, TEXT("DEBUG: 1. [Controller] Input Pressed! Tag: %s"), *InputTag.ToString());
 
-	if (GetASC())
-	{
-		GetASC()->AbilityInputTagPressed(InputTag);
-	}
-	else
-	{
-		// ASC를 못 찾았으면 여기서 신호가 죽은 겁니다.
-		UE_LOG(LogTemp, Error, TEXT("DEBUG: [Controller] Error! Could not find ASC!"));
-	}
+	if (GetASC() == nullptr) return;
+	GetASC()->AbilityInputTagPressed(InputTag);
 }
 
 void ASPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)

@@ -16,6 +16,8 @@ public:
 	UGA_AttackBase();
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+
+	static FGameplayTag GetAttackTargetEventTag();
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
 	TMap<int32, TObjectPtr<UAnimMontage>> AttackMontages;
@@ -36,5 +38,8 @@ private:
 	
 	int32 CurrentCount = 1;
 	FTimerHandle TimerHandle;
+
+	UFUNCTION()
+	void DoDamage(FGameplayEventData Data);
 	
 };

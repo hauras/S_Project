@@ -1,8 +1,12 @@
 
 
 #include "Ability/GA/Attack/GA_AttackBase.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "TimerManager.h"
+#include "AbilitySystemComponent.h"
 
 UGA_AttackBase::UGA_AttackBase()
 {
@@ -14,7 +18,6 @@ void UGA_AttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	UE_LOG(LogTemp, Error, TEXT("DEBUG: 4. [Ability] ActivateAbility Called! Success!"));
 
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 
@@ -22,43 +25,43 @@ void UGA_AttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 
 	if (AnimMontage && *AnimMontage)
 	{
-		UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-			this,
-			NAME_None,
-			*AnimMontage
-			);
-
+		// ... 몽타주 재생 로직은 기존과 동일 ...
+		UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, *AnimMontage);
 		MontageTask->OnCompleted.AddDynamic(this, &UGA_AttackBase::OnMontageEnded);
 		MontageTask->OnInterrupted.AddDynamic(this, &UGA_AttackBase::OnMontageEnded);
 		MontageTask->OnCancelled.AddDynamic(this, &UGA_AttackBase::OnMontageEnded);
-
 		MontageTask->ReadyForActivation();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UGA_AttackBase: No Montage found for Combo Count %d"), CurrentCount);
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		return;
 	}
+
+	// ★★★ 이 부분은 이제 필수입니다! ★★★
+	// 데미지 이벤트를 기다리는 태스크를 활성화합니다.
+	UAbilityTask_WaitGameplayEvent* WaitDamageEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, GetAttackTargetEventTag());
+	WaitDamageEventTask->EventReceived.AddDynamic(this, &UGA_AttackBase::DoDamage);
+	WaitDamageEventTask->ReadyForActivation();
+}
+
+FGameplayTag UGA_AttackBase::GetAttackTargetEventTag()
+{
+	return FGameplayTag::RequestGameplayTag("Event.Damage");
 }
 
 void UGA_AttackBase::OnMontageEnded()
 {
-	
-		// 콤보를 다음 단계로 진행시킵니다.
 	AdvanceCombo();
 
-		// 다음 입력이 없으면 콤보를 리셋하기 위한 타이머를 시작합니다.
 	GetWorld()->GetTimerManager().SetTimer(
 	TimerHandle,
 	this,
 	&UGA_AttackBase::ResetCombo,
-	AttackResetTime, // 블루프린트에서 설정 가능한 시간
+	AttackResetTime, 
 	false
 	);
 	
-
-	// 어빌리티의 현재 '실행'을 종료합니다.
-	// 콤보 상태(CurrentComboCount)는 유지됩니다.
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
@@ -77,4 +80,34 @@ void UGA_AttackBase::AdvanceCombo()
 void UGA_AttackBase::ResetCombo()
 {
 	CurrentCount = 1;
+}
+
+
+void UGA_AttackBase::DoDamage(FGameplayEventData Data)
+{
+	AActor* TargetActor = const_cast<AActor*>(Data.Target.Get());
+	if (!TargetActor)
+	{
+		return;
+	}
+
+	if (!DamageEffectClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DamageEffect is not set in %s"), *GetName());
+		return;
+	}
+
+	FGameplayEffectContextHandle ContextHandle = MakeEffectContext(CurrentSpecHandle, CurrentActorInfo);
+	FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), ContextHandle);
+
+	if (SpecHandle.IsValid())
+	{
+		FGameplayAbilityTargetDataHandle TargetDataHandle = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(TargetActor);
+
+		// --- [경고 해결을 위한 수정] ---
+		// 함수의 반환값을 변수에 저장하여 "결과를 사용"하도록 합니다.
+		// 지금 당장 이 변수를 사용하지 않더라도, 경고가 사라지고 더 안전한 코드가 됩니다.
+		TArray<FActiveGameplayEffectHandle> AppliedEffectHandles = ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, SpecHandle, TargetDataHandle);
+		// --- [수정 끝] ---
+	}
 }

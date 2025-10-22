@@ -27,8 +27,11 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	
-	InitAbilityActorInfo();
+	InitAbilityActorInfo(); 
+	
+	// 2단계: 그 다음, 서버의 고유 권한인 '상태 결정' 담당자들을 순서대로 호출한다.
 	AddCharacterAbilities();
+	InitializeDefaultAttributes();
 }
 
 void APlayerCharacter::OnRep_PlayerState()
@@ -36,6 +39,7 @@ void APlayerCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	InitAbilityActorInfo();
+
 }
 
 void APlayerCharacter::InitAbilityActorInfo()
@@ -45,4 +49,6 @@ void APlayerCharacter::InitAbilityActorInfo()
 	SPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(SPlayerState, this);
 	AbilitySystemComponent = SPlayerState->GetAbilitySystemComponent();
 	AttributeSet = SPlayerState->GetAttributeSet();
+
+
 }

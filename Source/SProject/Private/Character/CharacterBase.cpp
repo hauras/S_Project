@@ -2,6 +2,7 @@
 
 #include "Character/CharacterBase.h"
 
+#include "SGameplayTags.h"
 #include "Ability/SAbilitySystemComponent.h"
 
 
@@ -28,4 +29,29 @@ void ACharacterBase::AddCharacterAbilities()
 
 	SASC->AddCharacterAbilities(StartupAbilities);
 }
+
+void ACharacterBase::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const
+{
+	check(IsValid(GetAbilitySystemComponent()));
+	check(GameplayEffectClass);
+	FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	ContextHandle.AddSourceObject(this);
+	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffectClass, Level, ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), GetAbilitySystemComponent());
+}
+
+void ACharacterBase::InitializeDefaultAttributes() const
+{
+	ApplyEffectToSelf(MaxVitalAttributes, 1.f);
+	ApplyEffectToSelf(VitalAttributes, 1.f);
+
+}
+
+void ACharacterBase::InitAbilityActorInfo()
+{
+	
+}
+
+
+
 

@@ -14,6 +14,9 @@ public:
 	FGameplayTag InputTag_Look;
 	FGameplayTag InputTag_BasicAttack;
 
+	FGameplayTag Vital_Health;
+	FGameplayTag Vital_Mana;
+	
 	FGameplayTag Ability_BasicAttack;
 private:
 	static FSGameplayTags GameplayTags;
