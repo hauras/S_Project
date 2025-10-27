@@ -9,6 +9,12 @@
 
 ASPlayerController::ASPlayerController()
 {
+	PlayerTeamId = FGenericTeamId(0);
+}
+
+FGenericTeamId ASPlayerController::GetGenericTeamId() const
+{
+	return PlayerTeamId;
 }
 
 void ASPlayerController::BeginPlay()

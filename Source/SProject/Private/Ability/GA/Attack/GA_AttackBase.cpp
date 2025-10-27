@@ -25,7 +25,6 @@ void UGA_AttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 
 	if (AnimMontage && *AnimMontage)
 	{
-		// ... 몽타주 재생 로직은 기존과 동일 ...
 		UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, *AnimMontage);
 		MontageTask->OnCompleted.AddDynamic(this, &UGA_AttackBase::OnMontageEnded);
 		MontageTask->OnInterrupted.AddDynamic(this, &UGA_AttackBase::OnMontageEnded);
@@ -38,8 +37,6 @@ void UGA_AttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	// ★★★ 이 부분은 이제 필수입니다! ★★★
-	// 데미지 이벤트를 기다리는 태스크를 활성화합니다.
 	UAbilityTask_WaitGameplayEvent* WaitDamageEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, GetAttackTargetEventTag());
 	WaitDamageEventTask->EventReceived.AddDynamic(this, &UGA_AttackBase::DoDamage);
 	WaitDamageEventTask->ReadyForActivation();
@@ -104,10 +101,6 @@ void UGA_AttackBase::DoDamage(FGameplayEventData Data)
 	{
 		FGameplayAbilityTargetDataHandle TargetDataHandle = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(TargetActor);
 
-		// --- [경고 해결을 위한 수정] ---
-		// 함수의 반환값을 변수에 저장하여 "결과를 사용"하도록 합니다.
-		// 지금 당장 이 변수를 사용하지 않더라도, 경고가 사라지고 더 안전한 코드가 됩니다.
 		TArray<FActiveGameplayEffectHandle> AppliedEffectHandles = ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, SpecHandle, TargetDataHandle);
-		// --- [수정 끝] ---
 	}
 }

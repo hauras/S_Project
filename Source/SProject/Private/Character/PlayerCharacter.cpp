@@ -4,8 +4,10 @@
 
 #include "AbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Controller/SPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "State/SPlayerState.h"
+#include "UI/HUD/SHUD.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -51,4 +53,11 @@ void APlayerCharacter::InitAbilityActorInfo()
 	AttributeSet = SPlayerState->GetAttributeSet();
 
 
+	if (ASPlayerController* SPlayerController = Cast<ASPlayerController>(GetController()))
+	{
+		if (ASHUD* SHUD = Cast<ASHUD>(SPlayerController->GetHUD()))
+		{
+			SHUD->InitOverlay(SPlayerController, SPlayerState, AbilitySystemComponent, AttributeSet);
+		}
+	}
 }

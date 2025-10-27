@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "GameplayTagContainer.h"
+#include "GenericTeamAgentInterface.h"
 #include "SPlayerController.generated.h"
 
 class UInputAction;
@@ -17,17 +18,18 @@ struct FInputActionValue;
  * 
  */
 UCLASS()
-class SPROJECT_API ASPlayerController : public APlayerController
+class SPROJECT_API ASPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 public:
 	ASPlayerController();
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
 private:
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USInputConfig> InputConfig;
 
@@ -51,4 +53,6 @@ private:
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	void AbilityInputTagHeld(FGameplayTag InputTag);
+
+	FGenericTeamId PlayerTeamId;
 };
