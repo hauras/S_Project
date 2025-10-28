@@ -10,7 +10,7 @@ UOverlayWidgetController* ASHUD::GetOverlayWidgetController(const FWidgetControl
 	{
 		OverlayWidgetController = NewObject<UOverlayWidgetController>(this, OverlayWidgetControllerClass);
 		OverlayWidgetController->SetWidgetControllerParams(Params);
-
+		OverlayWidgetController->BindCallbacksToDependencies();
 		return OverlayWidgetController;
 	}
 	return OverlayWidgetController;
@@ -22,11 +22,9 @@ void ASHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemC
 	OverlayWidget = Cast<USUserWidgetBase>(Widget);
 
 	const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
-
 	UOverlayWidgetController* WidgetController = GetOverlayWidgetController(WidgetControllerParams);
 
 	OverlayWidget->SetWidgetController(WidgetController);
-	
+	WidgetController->BroadcastInitialValues();
 	Widget->AddToViewport();
-
 }
