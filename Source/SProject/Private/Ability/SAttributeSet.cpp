@@ -11,8 +11,7 @@
 
 USAttributeSet::USAttributeSet()
 {
-	InitHealth(100.f);
-	InitMaxHealth(100.f);
+
 }
 
 void USAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

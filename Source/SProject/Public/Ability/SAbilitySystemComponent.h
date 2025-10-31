@@ -13,7 +13,6 @@ class SPROJECT_API USAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 public:
-
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
 
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
