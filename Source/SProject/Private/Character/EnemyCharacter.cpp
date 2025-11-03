@@ -2,6 +2,7 @@
 
 #include "Character/EnemyCharacter.h"
 
+#include "SGameplayTags.h"
 #include "Ability/SAbilityFunctionLibrary.h"
 #include "Ability/SAbilitySystemComponent.h"
 #include "Ability/SAttributeSet.h"
@@ -30,10 +31,18 @@ AEnemyCharacter::AEnemyCharacter()
 	HealthBar->SetupAttachment(GetRootComponent());
 }
 
+void AEnemyCharacter::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bHitReacting = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
+}
+
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	InitAbilityActorInfo();
+	USAbilityFunctionLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
 
 	if (USUserWidgetBase* SUserWidget = Cast<USUserWidgetBase>(HealthBar->GetUserWidgetObject()))
 	{
@@ -55,7 +64,12 @@ void AEnemyCharacter::BeginPlay()
 				OnMaxHealthChanged.Broadcast(Data.NewValue);
 			}
 		);
-
+		
+		AbilitySystemComponent->RegisterGameplayTagEvent(FSGameplayTags::Get().Ability_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(
+			this,
+			&AEnemyCharacter::HitReactTagChanged
+		);
+		
 		OnHealthChanged.Broadcast(EnemyAS->GetHealth());
 		OnMaxHealthChanged.Broadcast(EnemyAS->GetMaxHealth());
 	}

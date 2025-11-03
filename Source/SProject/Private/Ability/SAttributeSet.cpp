@@ -4,6 +4,7 @@
 #include "Net/UnrealNetwork.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
+#include "SGameplayTags.h"
 #include "GameFramework/Character.h"
 
 
@@ -42,6 +43,35 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
+
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	{
+		// 2. 데미지가 적용된 후의 현재 체력 값을 가져옵니다.
+		const float NewHealth = GetHealth();
+		bool bFatal = NewHealth <= 0.f;
+
+		// 3. 데미지가 치명적이지 않은 경우에만 HitReact 어빌리티를 발동시킵니다.
+		if (!bFatal)
+		{
+			// 타겟에게 유효한 어빌리티 시스템 컴포넌트가 있는지 확인합니다.
+			if (Props.TargetASC)
+			{
+				// 발동시킬 어빌리티의 태그를 담을 컨테이너를 만듭니다.
+				FGameplayTagContainer TagContainer;
+				// SGameplayTags는 프로젝트의 태그 관리 클래스입니다.
+				// 강의에서 만든 Shared.Event.HitReact 또는 비슷한 태그를 가져옵니다.
+				TagContainer.AddTag(FSGameplayTags::Get().Ability_HitReact); 
+
+				// 태그를 사용하여 어빌리티를 발동시킵니다.
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			}
+		}
+		else
+		{
+			// TODO: 여기에 캐릭터가 죽었을 때의 처리를 구현합니다.
+			// 예: Death 어빌리티 발동, 래그돌 활성화 등
+		}
+	}
 }
 
 void USAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const

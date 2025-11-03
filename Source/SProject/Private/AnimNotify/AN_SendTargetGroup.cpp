@@ -50,10 +50,10 @@ void UAN_SendTargetGroup::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequ
 	// 이전 프레임 위치 -> 현재 프레임 위치로 SphereTrace를 실행하여 '궤적'을 만듭니다.
 	// 칼날 전체를 커버하기 위해 시작 소켓과 끝 소켓, 두 번의 트레이스를 실행합니다.
 	UKismetSystemLibrary::SphereTraceMulti(MeshComp->GetWorld(), PreviousStartLocation, CurrentStartLocation, TraceRadius, 
-		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Pawn), false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHits, true);
+		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Pawn), false, ActorsToIgnore, EDrawDebugTrace::None, OutHits, true);
 
 	UKismetSystemLibrary::SphereTraceMulti(MeshComp->GetWorld(), PreviousEndLocation, CurrentEndLocation, TraceRadius, 
-		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Pawn), false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHits, true);
+		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Pawn), false, ActorsToIgnore, EDrawDebugTrace::None, OutHits, true);
 
 	// 감지된 모든 대상에 대해 처리합니다.
 	for (const FHitResult& Hit : OutHits)

@@ -4,6 +4,7 @@
 
 #include "SGameplayTags.h"
 #include "Ability/SAbilitySystemComponent.h"
+#include "Components/CapsuleComponent.h"
 
 
 ACharacterBase::ACharacterBase()
@@ -14,6 +15,26 @@ ACharacterBase::ACharacterBase()
 UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+UAnimMontage* ACharacterBase::GetHitReactMontage_Implementation()
+{
+	return HitReactMontage;
+}
+
+void ACharacterBase::Die()
+{
+	MulticastHandleDeath();
+}
+
+void ACharacterBase::MulticastHandleDeath_Implementation()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetEnableGravity(true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ACharacterBase::BeginPlay()

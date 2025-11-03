@@ -23,4 +23,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AbilitySystemLibrary|CharacterClassDefaults")
 	static UEnemyStats* GetMonsterClassInfo(const UObject* WorldContextObject);
+
+	
 };

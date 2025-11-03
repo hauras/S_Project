@@ -18,6 +18,8 @@ public:
 	FGameplayTag Vital_Mana;
 	
 	FGameplayTag Ability_BasicAttack;
+	FGameplayTag Ability_HitReact;
+	
 private:
 	static FSGameplayTags GameplayTags;
 };

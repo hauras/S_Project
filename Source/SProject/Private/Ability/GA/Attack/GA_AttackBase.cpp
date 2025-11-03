@@ -87,13 +87,10 @@ void UGA_AttackBase::DoDamage(FGameplayEventData Data)
 	{
 		return;
 	}
-
 	if (!DamageEffectClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DamageEffect is not set in %s"), *GetName());
 		return;
 	}
-
 	FGameplayEffectContextHandle ContextHandle = MakeEffectContext(CurrentSpecHandle, CurrentActorInfo);
 	FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), ContextHandle);
 

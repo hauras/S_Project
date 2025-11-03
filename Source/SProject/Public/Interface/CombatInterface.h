@@ -5,7 +5,7 @@
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, BlueprintType)
 class UCombatInterface : public UInterface
 {
 	GENERATED_BODY()
@@ -19,5 +19,10 @@ class SPROJECT_API ICombatInterface
 	GENERATED_BODY()
 
 public:
-	virtual void AttackHitCheck() = 0;
+	//virtual void AttackHitCheck() = 0;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UAnimMontage* GetHitReactMontage();
+
+	virtual void Die() = 0;
 };

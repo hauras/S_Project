@@ -10,7 +10,6 @@
 void USAbilityFunctionLibrary::InitializeDefaultAttributes(const UObject* WorldContextObject, EEnemyType EnemyType,
                                                            float Level, UAbilitySystemComponent* ASC)
 {
-	// ===================== 디버그 강화 버전 시작 =====================
 
 	AActor* AvatarActor = ASC->GetAvatarActor();
 	if (!AvatarActor)
