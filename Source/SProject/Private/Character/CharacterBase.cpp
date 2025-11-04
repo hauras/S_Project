@@ -2,9 +2,12 @@
 
 #include "Character/CharacterBase.h"
 
+#include "AIController.h"
 #include "SGameplayTags.h"
 #include "Ability/SAbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "BrainComponent.h"
 
 
 ACharacterBase::ACharacterBase()
@@ -20,21 +23,6 @@ UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
 UAnimMontage* ACharacterBase::GetHitReactMontage_Implementation()
 {
 	return HitReactMontage;
-}
-
-void ACharacterBase::Die()
-{
-	MulticastHandleDeath();
-}
-
-void ACharacterBase::MulticastHandleDeath_Implementation()
-{
-	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->SetEnableGravity(true);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
-	
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ACharacterBase::BeginPlay()
@@ -73,6 +61,30 @@ void ACharacterBase::InitAbilityActorInfo()
 	
 }
 
+void ACharacterBase::Die()
+{
+	if (HasAuthority())
+	{
+		MulticastHandleDeath();
+	}
+}
 
+void ACharacterBase::MulticastHandleDeath_Implementation()
+{
+	if (AAIController* AIController = Cast<AAIController>(GetController()))
+	{
+		AIController->BrainComponent->StopLogic("Dead");
+	}
+
+	// 2. 캐릭터의 이동 및 충돌을 비활성화합니다.
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 3. 죽음 애니메이션 몽타주를 재생합니다.
+	if (DeathMontage)
+	{
+		PlayAnimMontage(DeathMontage);
+	}
+}
 
 

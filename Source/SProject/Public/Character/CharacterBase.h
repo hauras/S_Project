@@ -54,6 +54,8 @@ protected:
 
 	virtual void InitAbilityActorInfo();
 
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TObjectPtr<UAnimMontage> DeathMontage;
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;

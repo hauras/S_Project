@@ -33,12 +33,14 @@ public:
 	float BaseWalkSpeed = 250.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	float LifeSpan = 5.f;
+	float LifeSpan = 3.f;
 protected:
 	virtual void BeginPlay() override;
 	
 	virtual void InitAbilityActorInfo() override;
 	virtual void InitializeDefaultAttributes() const override;
+	virtual void Die() override;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults") 
 	int32 Level = 1;

@@ -73,8 +73,6 @@ void AEnemyCharacter::BeginPlay()
 		OnHealthChanged.Broadcast(EnemyAS->GetHealth());
 		OnMaxHealthChanged.Broadcast(EnemyAS->GetMaxHealth());
 	}
-
-	
 }
 
 void AEnemyCharacter::InitAbilityActorInfo()
@@ -89,4 +87,10 @@ void AEnemyCharacter::InitAbilityActorInfo()
 void AEnemyCharacter::InitializeDefaultAttributes() const
 {
 	USAbilityFunctionLibrary::InitializeDefaultAttributes(this, EnemyType, Level, AbilitySystemComponent);
+}
+
+void AEnemyCharacter::Die()
+{
+	SetLifeSpan(LifeSpan);
+	Super::Die();
 }
