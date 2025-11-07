@@ -31,7 +31,6 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	
 	InitAbilityActorInfo(); 
 	
-	// 2단계: 그 다음, 서버의 고유 권한인 '상태 결정' 담당자들을 순서대로 호출한다.
 	AddCharacterAbilities();
 	InitializeDefaultAttributes();
 }

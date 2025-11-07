@@ -42,8 +42,11 @@ void AEnemyCharacter::BeginPlay()
 	Super::BeginPlay();
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	InitAbilityActorInfo();
-	USAbilityFunctionLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
-
+	
+	if (HasAuthority())
+	{
+		USAbilityFunctionLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+	}
 	if (USUserWidgetBase* SUserWidget = Cast<USUserWidgetBase>(HealthBar->GetUserWidgetObject()))
 	{
 		SUserWidget->SetWidgetController(this);
