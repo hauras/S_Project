@@ -31,6 +31,8 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath();
+
+	virtual bool IsDead() const override;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -56,6 +58,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<UAnimMontage> DeathMontage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Combat")
+	bool bIsDead = false;
+	
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;

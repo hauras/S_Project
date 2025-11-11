@@ -25,6 +25,11 @@ UAnimMontage* ACharacterBase::GetHitReactMontage_Implementation()
 	return HitReactMontage;
 }
 
+bool ACharacterBase::IsDead() const
+{
+	return bIsDead;
+}
+
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -63,6 +68,12 @@ void ACharacterBase::InitAbilityActorInfo()
 
 void ACharacterBase::Die()
 {
+	if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
+	
 	if (HasAuthority())
 	{
 		MulticastHandleDeath();
