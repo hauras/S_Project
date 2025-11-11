@@ -14,6 +14,7 @@ public:
 	FGameplayTag InputTag_Look;
 	FGameplayTag InputTag_BasicAttack;
 	FGameplayTag InputTag_Dodge;
+	FGameplayTag InputTag_FrostAttack;
 	
 	FGameplayTag Vital_Health;
 	FGameplayTag Vital_Mana;
@@ -22,6 +23,12 @@ public:
 	FGameplayTag Ability_HitReact;
 
 	FGameplayTag Ability_Dodge;
+	FGameplayTag Cooldown_Dodge;
+
+	FGameplayTag Ability_FrostAttack;
+	FGameplayTag Cooldown_FrostAttack;
+
+	
 private:
 	static FSGameplayTags GameplayTags;
 };
