@@ -15,6 +15,7 @@ public:
 	FGameplayTag InputTag_BasicAttack;
 	FGameplayTag InputTag_Dodge;
 	FGameplayTag InputTag_FrostAttack;
+	FGameplayTag InputTag_IceProjectile;
 	
 	FGameplayTag Vital_Health;
 	FGameplayTag Vital_Mana;
@@ -28,6 +29,10 @@ public:
 	FGameplayTag Ability_FrostAttack;
 	FGameplayTag Cooldown_FrostAttack;
 
+	FGameplayTag Ability_IceProjectile;
+	FGameplayTag Cooldown_IceProjectile;
+
+	FGameplayTag Combat_Socket_Weapon;
 	
 private:
 	static FSGameplayTags GameplayTags;

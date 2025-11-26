@@ -55,4 +55,10 @@ private:
 	void AbilityInputTagHeld(FGameplayTag InputTag);
 
 	FGenericTeamId PlayerTeamId;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> CrosshairWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> CrosshairWidgetClassInstance;
 };

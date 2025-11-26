@@ -33,7 +33,8 @@ public:
 	virtual void MulticastHandleDeath();
 
 	virtual bool IsDead() const override;
-	
+
+	virtual FVector GetSocketLocation(const FGameplayTag& SocketTag) const override;
 protected:
 	virtual void BeginPlay() override;
 

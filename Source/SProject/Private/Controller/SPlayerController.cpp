@@ -6,6 +6,7 @@
 #include "SGameplayTags.h" // GameplayTag를 사용하기 위해
 #include "Ability/SAbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Blueprint/UserWidget.h"
 
 ASPlayerController::ASPlayerController()
 {
@@ -27,7 +28,17 @@ void ASPlayerController::BeginPlay()
 		{
 			Subsystem->AddMappingContext(InputConfig->InputMappingContext, 0);
 		}
-	}}
+	}
+
+	if (IsLocalController() && CrosshairWidgetClass)
+	{
+		CrosshairWidgetClassInstance = CreateWidget<UUserWidget>(this, CrosshairWidgetClass);
+		if (CrosshairWidgetClassInstance)
+		{
+			CrosshairWidgetClassInstance->AddToViewport();
+		}
+	}
+}
 
 void ASPlayerController::SetupInputComponent()
 {

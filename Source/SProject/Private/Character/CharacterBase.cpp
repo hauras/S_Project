@@ -30,6 +30,18 @@ bool ACharacterBase::IsDead() const
 	return bIsDead;
 }
 
+FVector ACharacterBase::GetSocketLocation(const FGameplayTag& SocketTag) const
+{
+	if (SocketTag.MatchesTagExact(FSGameplayTags::Get().Combat_Socket_Weapon))
+	{
+		// 2. 'weapon' 뼈가 아닌, 'WeaponEndSocket' 소켓의 위치를 반환합니다.
+		return GetMesh()->GetSocketLocation(FName("WeaponEndSocket"));
+	}
+
+	// 만약 약속된 태그가 아니라면, 그냥 기본 위치를 반환합니다.
+	return GetActorLocation();
+}
+
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();

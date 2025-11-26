@@ -116,16 +116,12 @@ void UGA_FrostAttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 		{
 			FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, GetAbilityLevel());
 			
-			// ★★★ 2. for 루프를 아래와 같이 수정합니다. ★★★
 			for (AActor* TargetActor : OverlappingActors)
 			{
-				// 타겟을 ICombatInterface로 캐스팅해 봅니다.
 				ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetActor);
 
-				// 캐스팅에 성공했고, 그 타겟이 아직 죽지 않았다면...
 				if (CombatInterface && !CombatInterface->IsDead())
 				{
-					// ...그때만 데미지를 적용합니다.
 					if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor))
 					{
 						TargetASC->ApplyGameplayEffectSpecToSelf(*DamageSpecHandle.Data.Get());

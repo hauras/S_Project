@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
@@ -27,4 +28,5 @@ public:
 	virtual void Die() = 0;
 	virtual bool IsDead() const = 0;
 
+	virtual FVector GetSocketLocation(const FGameplayTag& SocketTag) const = 0;
 };
