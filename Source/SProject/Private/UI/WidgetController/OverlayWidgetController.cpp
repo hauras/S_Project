@@ -2,13 +2,13 @@
 
 #include "UI/WidgetController/OverlayWidgetController.h"
 
+#include "Ability/SAbilitySystemComponent.h"
 #include "Ability/SAttributeSet.h"
+#include "Data/AbilityInfo.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
 	const USAttributeSet* SAttributeSet = Cast<USAttributeSet>(AttributeSet);
-
-	UE_LOG(LogTemp, Error, TEXT("DEBUG: [WController] Broadcasting Initial Values! Health: %f, MaxHealth: %f"), SAttributeSet->GetHealth(), SAttributeSet->GetMaxHealth());
 	
 	OnHealthChanged.Broadcast(SAttributeSet->GetHealth());
 	OnMaxHealthChanged.Broadcast(SAttributeSet->GetMaxHealth());
@@ -31,18 +31,28 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		SAttributeSet->GetMaxManaAttribute()).AddUObject(this, &UOverlayWidgetController::MaxManaChanged);
+
+	if (USAbilitySystemComponent* SASC = Cast<USAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		if (SASC->bStartupAbilitiesGiven)
+		{
+			OnInitializeStartupAbilities(SASC);
+		}
+		else
+		{
+			SASC->AbilityGivenDelegate.AddUObject(this, &UOverlayWidgetController::OnInitializeStartupAbilities);
+		}
+	}
 }
 
 void UOverlayWidgetController::HealthChanged(const FOnAttributeChangeData& Data)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DEBUG: [WController] Health Changed event received! NewValue: %f"), Data.NewValue);
 
 	OnHealthChanged.Broadcast(Data.NewValue);
 }
 
 void UOverlayWidgetController::MaxHealthChanged(const FOnAttributeChangeData& Data)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DEBUG: [WController] MaxHealth Changed event received! NewValue: %f"), Data.NewValue);
 
 	OnMaxHealthChanged.Broadcast(Data.NewValue);
 }
@@ -55,4 +65,19 @@ void UOverlayWidgetController::ManaChanged(const FOnAttributeChangeData& Data)
 void UOverlayWidgetController::MaxManaChanged(const FOnAttributeChangeData& Data)
 {
 	OnMaxManaChanged.Broadcast(Data.NewValue);
+}
+
+void UOverlayWidgetController::OnInitializeStartupAbilities(USAbilitySystemComponent* SAbilitySystemComponent)
+{
+	if (!SAbilitySystemComponent->bStartupAbilitiesGiven) return;
+
+	FForEachAbility BroadcastDelegate;
+	BroadcastDelegate.BindLambda([this, SAbilitySystemComponent](const FGameplayAbilitySpec& AbilitySpec)
+	{
+		
+		FSAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(SAbilitySystemComponent->GetAbilityTagFromSpec(AbilitySpec));
+		Info.InputTag = SAbilitySystemComponent->GetInputTagFromSpec(AbilitySpec);
+		AbilityInfoDelegate.Broadcast(Info);
+	});
+	SAbilitySystemComponent->ForEachAbility(BroadcastDelegate);
 }

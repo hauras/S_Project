@@ -104,12 +104,7 @@ void UGA_ProjectileBase::SpawnProjectile(FGameplayEventData Payload)
 
     // 4. 최종 발사 각도 계산 (총구 -> 목표 지점)
     FRotator SpawnRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, TargetLocation);
-
-    // [디버깅] 이 라인이 "내가 조준한 곳"으로 나가는지 화면에서 확인하세요. (빨간선)
-    // DrawDebugLine(GetWorld(), SpawnLocation, TargetLocation, FColor::Red, false, 3.0f, 0, 2.0f);
-
-    // -------------------------------------------------------------------------
-
+	
     FTransform SpawnTransform(SpawnRotation, SpawnLocation);
     
     AProjectile* Projectile = GetWorld()->SpawnActorDeferred<AProjectile>(
@@ -122,10 +117,11 @@ void UGA_ProjectileBase::SpawnProjectile(FGameplayEventData Payload)
 
     if (Projectile)
     {
-        Projectile->DamageEffectClass = DamageEffectClass; // 필요 시 주석 해제
+        Projectile->DamageEffectClass = DamageEffectClass; 
         Projectile->FinishSpawning(SpawnTransform);
     }
 }
+
 void UGA_ProjectileBase::OnMontageEnded()
 {
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);
