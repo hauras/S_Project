@@ -19,7 +19,12 @@ public:
 	FAbilityGiven AbilityGivenDelegate;
 	
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
+
+	UPROPERTY(ReplicatedUsing = OnRep_StartupAbilitiesGiven)
 	bool bStartupAbilitiesGiven = false;
+
+	UFUNCTION()
+	void OnRep_StartupAbilitiesGiven();
 	
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagPressed(const FGameplayTag& InputTag);
@@ -28,4 +33,7 @@ public:
 
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+
+protected:
+
 };

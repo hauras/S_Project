@@ -3,6 +3,16 @@
 #include "Ability/SAbilitySystemComponent.h"
 #include "SGameplayTags.h"
 #include "Ability/GA/SGameplayAbility.h"
+#include "Net/UnrealNetwork.h"
+
+void USAbilitySystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// bStartupAbilitiesGiven 변수를 복제 목록에 등록합니다.
+	// 이 코드가 있어야 서버의 true 값이 클라이언트로 전달됩니다.
+	DOREPLIFETIME(USAbilitySystemComponent, bStartupAbilitiesGiven);
+}
 
 void USAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
 {
@@ -17,6 +27,11 @@ void USAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UG
 		}
 	}
 	bStartupAbilitiesGiven = true;
+	OnRep_StartupAbilitiesGiven();
+}
+
+void USAbilitySystemComponent::OnRep_StartupAbilitiesGiven()
+{
 	AbilityGivenDelegate.Broadcast(this);
 }
 

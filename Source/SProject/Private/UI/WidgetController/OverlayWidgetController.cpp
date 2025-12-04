@@ -14,6 +14,16 @@ void UOverlayWidgetController::BroadcastInitialValues()
 	OnMaxHealthChanged.Broadcast(SAttributeSet->GetMaxHealth());
 	OnManaChanged.Broadcast(SAttributeSet->GetMana());
 	OnMaxManaChanged.Broadcast(SAttributeSet->GetMaxMana());
+
+	if (USAbilitySystemComponent* SASC = Cast<USAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		// 2. "혹시 스킬 부여가 이미 끝났나요?" 라고 확인합니다.
+		if (SASC->bStartupAbilitiesGiven)
+		{
+			// 3. 만약 끝났다면, 스킬 정보를 방송하는 함수를 '다시 한번' 호출해 줍니다.
+			OnInitializeStartupAbilities(SASC);
+		}
+	}
 }
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
