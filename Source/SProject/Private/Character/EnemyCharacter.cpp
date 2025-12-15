@@ -6,9 +6,13 @@
 #include "Ability/SAbilityFunctionLibrary.h"
 #include "Ability/SAbilitySystemComponent.h"
 #include "Ability/SAttributeSet.h"
+#include "AI/SAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/SUserWidgetBase.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -31,10 +35,24 @@ AEnemyCharacter::AEnemyCharacter()
 	HealthBar->SetupAttachment(GetRootComponent());
 }
 
+void AEnemyCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (!HasAuthority()) return;
+	SAIController = Cast<ASAIController>(NewController);
+	SAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+	SAIController->RunBehaviorTree(BehaviorTree);
+	SAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
+	SAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), EnemyType != EEnemyType::Melee);
+	
+}
+
 void AEnemyCharacter::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
 	bHitReacting = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
+	SAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
 }
 
 void AEnemyCharacter::BeginPlay()

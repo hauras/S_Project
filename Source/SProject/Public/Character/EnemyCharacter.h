@@ -7,7 +7,9 @@
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "EnemyCharacter.generated.h"
 
+class ASAIController;
 class UWidgetComponent;
+class UBehaviorTree;
 /**
  * 
  */
@@ -18,6 +20,8 @@ class SPROJECT_API AEnemyCharacter : public ACharacterBase
 public:
 	AEnemyCharacter();
 
+	virtual void PossessedBy(AController* NewController) override;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnHealthChanged;
 
@@ -27,7 +31,7 @@ public:
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
-	bool bHitReacting = true;
+	bool bHitReacting = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	float BaseWalkSpeed = 250.f;
@@ -42,8 +46,7 @@ protected:
 	virtual void InitAbilityActorInfo() override;
 	virtual void InitializeDefaultAttributes() const override;
 	virtual void Die() override;
-
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults") 
 	int32 Level = 1;
 
@@ -53,4 +56,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;
 
+	UPROPERTY(EditAnywhere, Category = "AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+	
+	UPROPERTY()
+	TObjectPtr<ASAIController> SAIController;
 };

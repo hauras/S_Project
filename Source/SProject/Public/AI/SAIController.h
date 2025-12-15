@@ -5,6 +5,8 @@
 #include "AIController.h"
 #include "SAIController.generated.h"
 
+class UBlackboardComponent;
+class UBehaviorTreeComponent;
 class UAISenseConfig_Sight;
 class UAIPerceptionComponent;
 /**
@@ -29,6 +31,7 @@ protected:
 	UFUNCTION()
 	virtual void OnEnemyPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
-	
+	UPROPERTY()
+	TObjectPtr<UBehaviorTreeComponent> BehaviorTreeComponent;
 };
 
