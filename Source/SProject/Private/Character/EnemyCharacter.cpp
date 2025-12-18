@@ -63,7 +63,7 @@ void AEnemyCharacter::BeginPlay()
 	
 	if (HasAuthority())
 	{
-		USAbilityFunctionLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+		USAbilityFunctionLibrary::GiveStartupAbilities(this, AbilitySystemComponent, EnemyType);
 	}
 	if (USUserWidgetBase* SUserWidget = Cast<USUserWidgetBase>(HealthBar->GetUserWidgetObject()))
 	{
@@ -114,4 +114,13 @@ void AEnemyCharacter::Die()
 {
 	SetLifeSpan(LifeSpan);
 	Super::Die();
+}
+
+void AEnemyCharacter::SetCombatTarget_Implementation(AActor* InCombatTarget)
+{
+	CombatTarget = InCombatTarget;}
+
+AActor* AEnemyCharacter::GetCombatTarget_Implementation() const
+{
+	return CombatTarget;
 }

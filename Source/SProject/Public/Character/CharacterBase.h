@@ -34,6 +34,9 @@ public:
 
 	virtual bool IsDead() const override;
 
+	virtual AActor* GetAvatar() override;
+	
+	UFUNCTION(BlueprintCallable)
 	virtual FVector GetSocketLocation(const FGameplayTag& SocketTag) const override;
 protected:
 	virtual void BeginPlay() override;

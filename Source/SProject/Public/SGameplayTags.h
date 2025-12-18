@@ -33,7 +33,8 @@ public:
 	FGameplayTag Cooldown_IceProjectile;
 
 	FGameplayTag Combat_Socket_Weapon;
-	
+
+	FGameplayTag Ability_Attack;
 private:
 	static FSGameplayTags GameplayTags;
 };

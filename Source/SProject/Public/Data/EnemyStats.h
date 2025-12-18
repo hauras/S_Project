@@ -20,7 +20,10 @@ USTRUCT(BlueprintType)
 struct FEnemyClassDefaultInfo
 {
 	GENERATED_BODY()
-	
+public:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Class Defaults")
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 };
 /**
  * 

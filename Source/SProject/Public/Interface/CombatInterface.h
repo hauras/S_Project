@@ -25,8 +25,13 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	UAnimMontage* GetHitReactMontage();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void UpdateFacingTarget(const FVector& Target);
+	
 	virtual void Die() = 0;
 	virtual bool IsDead() const = 0;
 
+	virtual AActor* GetAvatar() = 0;
+	
 	virtual FVector GetSocketLocation(const FGameplayTag& SocketTag) const = 0;
 };

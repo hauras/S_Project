@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Character/CharacterBase.h"
 #include "Data/EnemyStats.h"
+#include "Interface/EnemyInterface.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "EnemyCharacter.generated.h"
 
@@ -14,7 +15,7 @@ class UBehaviorTree;
  * 
  */
 UCLASS()
-class SPROJECT_API AEnemyCharacter : public ACharacterBase
+class SPROJECT_API AEnemyCharacter : public ACharacterBase, public IEnemyInterface
 {
 	GENERATED_BODY()
 public:
@@ -39,6 +40,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float LifeSpan = 3.f;
 	
+	UPROPERTY(BlueprintReadWrite, Category = "Combat")
+	TObjectPtr<AActor> CombatTarget;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -46,6 +50,8 @@ protected:
 	virtual void InitAbilityActorInfo() override;
 	virtual void InitializeDefaultAttributes() const override;
 	virtual void Die() override;
+	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
+	virtual AActor* GetCombatTarget_Implementation() const override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults") 
 	int32 Level = 1;

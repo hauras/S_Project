@@ -28,6 +28,7 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 
 	GameplayTags.Combat_Socket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Weapon"), FString("Combat_Socket_Weapon"));
 
+	GameplayTags.Ability_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack"), FString("Attack"));
 
 	
 }
