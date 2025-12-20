@@ -21,4 +21,6 @@ public:
 
 protected:
 	TArray<FHitResult> GetHitResultFromTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, bool bDrawDebug = false, bool bIgnoreSelf = true) const;
+
+
 };

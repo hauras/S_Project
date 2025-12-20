@@ -80,15 +80,12 @@ void UGA_FrostAttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 				true
 			);
 
-			// 4. 바닥을 찾았는지 확인하고, 최종 생성 위치를 결정합니다.
 			FVector FinalImpactLocation = LocationInAir; // 기본값은 공중 위치
 			if (HitResult.bBlockingHit)
 			{
-				// 바닥을 찾았다면, 레이저가 닿은 바로 그 지점을 최종 위치로 설정합니다.
 				FinalImpactLocation = HitResult.ImpactPoint;
 			}
 
-			// 5. 계산된 최종 위치에 이펙트를 생성합니다.
 			FRotator ImpactRotation = FRotator(0.f, CurrentAngle, 0.f);
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, FinalImpactLocation, ImpactRotation);
 		}

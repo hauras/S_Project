@@ -30,3 +30,4 @@ TArray<FHitResult> USGameplayAbility::GetHitResultFromTargetData(
 	}
 	return HitResults;
 }
+

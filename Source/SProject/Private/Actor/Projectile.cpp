@@ -7,6 +7,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Interface/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
 AProjectile::AProjectile()
@@ -53,12 +54,16 @@ void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		{
 			if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 			{
-				// 데미지를 적용합니다!
 				FGameplayEffectContextHandle EffectContext = TargetASC->MakeEffectContext();
 				EffectContext.AddSourceObject(this);
 				FGameplayEffectSpecHandle SpecHandle = TargetASC->MakeOutgoingSpec(DamageEffectClass, 1.f, EffectContext);
 				TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 			}
+		}
+
+		if (ImpactVFX)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactVFX, GetActorLocation());
 		}
 		Destroy();
 	}
