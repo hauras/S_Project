@@ -4,6 +4,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
 #include "SGameplayTags.h"
+#include "Character/BossCharacter.h"
 #include "GameFramework/Character.h"
 #include "Interface/CombatInterface.h"
 
@@ -60,9 +61,19 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 		}
 		else
 		{
-			FGameplayTagContainer TagContainer;
-			TagContainer.AddTag(FSGameplayTags::Get().Ability_HitReact);
-			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			if (ABossCharacter* Boss = Cast<ABossCharacter>(Props.TargetAvatarActor))
+			{
+				// '보스'가 맞다면, '디졸브 피격 효과'를 재생하는 함수를 호출합니다.
+				Boss->PlayHitReactEffect();
+			}
+			// 2-B. 만약 '보스'가 아니라면 (즉, 일반 몬스터나 플레이어라면)...
+			else
+			{
+				// 기존처럼 '애니메이션 기반 HitReact' 어빌리티를 발동시킵니다.
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FSGameplayTags::Get().Ability_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			}
 		}
 	}
 }

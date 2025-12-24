@@ -83,30 +83,44 @@ void ACharacterBase::InitAbilityActorInfo()
 
 void ACharacterBase::Die()
 {
+	// 중복된 죽음을 방지하는 가드는 그대로 둡니다.
 	if (bIsDead)
 	{
 		return;
 	}
 	bIsDead = true;
 	
+	// 서버에서만 멀티캐스트를 호출합니다.
 	if (HasAuthority())
 	{
 		MulticastHandleDeath();
 	}
 }
 
+
 void ACharacterBase::MulticastHandleDeath_Implementation()
 {
+	// 1. AI 로직 중지 (안전하게 체크)
 	if (AAIController* AIController = Cast<AAIController>(GetController()))
 	{
-		AIController->BrainComponent->StopLogic("Dead");
+		if (AIController->BrainComponent) // ← 반드시 체크해야 합니다!
+		{
+			AIController->BrainComponent->StopLogic("Dead");
+		}
 	}
 
-	// 2. 캐릭터의 이동 및 충돌을 비활성화합니다.
-	GetCharacterMovement()->DisableMovement();
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 2. 캐릭터의 이동 및 충돌 비활성화 (Getter 사용 및 유효성 검사)
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->DisableMovement();
+	}
 
-	// 3. 죽음 애니메이션 몽타주를 재생합니다.
+	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent())
+	{
+		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	// 3. 죽음 애니메이션 몽타주 재생
 	if (DeathMontage)
 	{
 		PlayAnimMontage(DeathMontage);

@@ -1,6 +1,8 @@
 
 
 #include "UI/HUD/SHUD.h"
+
+#include "Character/EnemyCharacter.h"
 #include "UI/SUserWidgetBase.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 
@@ -33,3 +35,5 @@ void ASHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemC
 	// ★★★ 5. 그리고 '가장 마지막에' 초기값 방송을 요청합니다! ★★★
 	WidgetController->BroadcastInitialValues();
 }
+
+

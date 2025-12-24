@@ -52,6 +52,7 @@ protected:
 	virtual void Die() override;
 	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
 	virtual AActor* GetCombatTarget_Implementation() const override;
+	//virtual bool IsBoss_Implementation() const override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults") 
 	int32 Level = 1;

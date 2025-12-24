@@ -39,13 +39,34 @@ void AEnemyCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	if (!HasAuthority()) return;
+	// 이 로직은 서버에서만 실행되어야 합니다.
+	if (!HasAuthority()) 
+	{
+		return;
+	}
+
+	// 1. 이 캐릭터를 조종할 AI 컨트롤러로 캐스팅을 '시도'합니다.
 	SAIController = Cast<ASAIController>(NewController);
-	SAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
-	SAIController->RunBehaviorTree(BehaviorTree);
-	SAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
-	SAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), EnemyType != EEnemyType::Melee);
+
+	// 2. '만약' 캐스팅에 성공했고(SAIController가 유효하고),
+	//    블루프린트에서 행동 트리 애셋이 제대로 할당되었다면...
+	if (SAIController && BehaviorTree)
+	{
+		// 3. 컨트롤러에게 행동 트리를 실행하라고 '명령'합니다.
+		// RunBehaviorTree 함수가 내부적으로 블랙보드 초기화를 안전하게 처리해 줍니다.
+		SAIController->RunBehaviorTree(BehaviorTree);
+		
+		// 4. 행동 트리가 실행된 후에, 블랙보드에 초기값을 설정합니다.
+		UBlackboardComponent* BlackboardComp = SAIController->GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			BlackboardComp->SetValueAsBool(FName("HitReacting"), false);
+			BlackboardComp->SetValueAsBool(FName("RangedAttacker"), EnemyType != EEnemyType::Melee);
+		}
+	}
 	
+	// 만약 캐스팅에 실패했거나(AI 컨트롤러가 아니거나), BehaviorTree가 할당되지 않았다면,
+	// 아무것도 하지 않고 함수를 안전하게 종료합니다.
 }
 
 void AEnemyCharacter::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
@@ -128,3 +149,9 @@ AActor* AEnemyCharacter::GetCombatTarget_Implementation() const
 {
 	return CombatTarget;
 }
+
+/*bool AEnemyCharacter::IsBoss_Implementation() const
+{
+	return EnemyType == EEnemyType::Boss;
+}
+*/

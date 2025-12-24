@@ -26,8 +26,12 @@ public:
 	UOverlayWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& Params);
 
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
-protected:
 
+	/*UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
+	void ShowBossHealthBar(AActor* BossActor, const FString& BossName);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
+	void HideBossHealthBar();*/
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<USUserWidgetBase> OverlayWidgetClass;
@@ -37,4 +41,5 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
+	
 };

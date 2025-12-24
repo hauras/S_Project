@@ -14,6 +14,7 @@ enum class EEnemyType : uint8
 	Melee,
 	Ranged,
 	Mage,
+	Boss
 };
 
 USTRUCT(BlueprintType)
@@ -24,6 +25,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Class Defaults")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
+	TSubclassOf<UGameplayEffect> MaxVitalAttributes;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
+	TSubclassOf<UGameplayEffect> VitalAttributes;
 };
 /**
  * 
@@ -37,11 +44,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = " Enemy Class Defaults")
 	TMap<EEnemyType, FEnemyClassDefaultInfo> EnemyClassInfo;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> MaxVitalAttributes;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> VitalAttributes;
 
 	FEnemyClassDefaultInfo GetClassDefaultInfo(EEnemyType EnemyClass);
 

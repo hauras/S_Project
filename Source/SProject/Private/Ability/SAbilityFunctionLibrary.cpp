@@ -29,16 +29,17 @@ void USAbilityFunctionLibrary::InitializeDefaultAttributes(const UObject* WorldC
 
 	FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
 	ContextHandle.AddSourceObject(ASC->GetAvatarActor());
+	const FEnemyClassDefaultInfo& Info = EnemyInfo->GetClassDefaultInfo(EnemyType);
 
-	if (EnemyInfo->MaxVitalAttributes)
+	if (Info.MaxVitalAttributes)
 	{
-		const FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(EnemyInfo->MaxVitalAttributes, Level, ContextHandle);
+		const FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(Info.MaxVitalAttributes, Level, ContextHandle);
 		ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 	}
 
-	if (EnemyInfo->VitalAttributes)
+	if (Info.VitalAttributes)
 	{
-		const FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(EnemyInfo->VitalAttributes, Level, ContextHandle);
+		const FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(Info.VitalAttributes, Level, ContextHandle);
 		ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 	}
 }
