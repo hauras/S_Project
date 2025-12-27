@@ -41,7 +41,14 @@ FVector ACharacterBase::GetSocketLocation(const FGameplayTag& SocketTag) const
 	{
 		return GetMesh()->GetSocketLocation(FName("WeaponEndSocket"));
 	}
-
+	if (SocketTag.MatchesTagExact(FSGameplayTags::Get().Combat_Socket_Fist_Right))
+	{
+		return GetMesh()->GetSocketLocation(FName("Fist_R_Socket"));
+	}
+	if (SocketTag.MatchesTagExact(FSGameplayTags::Get().Combat_Socket_Fist_Left))
+	{
+		return GetMesh()->GetSocketLocation(FName("Fist_L_Socket"));
+	}
 	return GetActorLocation();
 }
 

@@ -27,7 +27,13 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Cooldown_IceProjectile = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.IceProjectile"), FString("Cooldown_IceProjectile"));
 
 	GameplayTags.Combat_Socket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Weapon"), FString("Combat_Socket_Weapon"));
+	GameplayTags.Combat_Socket_Fist_Right = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Fist.Right"), FString("Combat_Socket_Fist_Right"));
+	GameplayTags.Combat_Socket_Fist_Left = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Fist.Left"), FString("Combat_Socket_Fist_Left"));
+	
+	GameplayTags.Event_Montage_Attack_Fist_Right = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Event.Montage.Attack.Fist.Right"), FString("Event_Montage_Attack_Fist_Right"));
+	GameplayTags.Event_Montage_Attack_Fist_Left = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Event.Montage.Attack.Fist.Left"), FString("Event_Montage_Attack_Fist_Left"));
 
+	
 	GameplayTags.Ability_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack"), FString("Attack"));
 
 	

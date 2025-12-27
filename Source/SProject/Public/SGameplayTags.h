@@ -33,7 +33,12 @@ public:
 	FGameplayTag Cooldown_IceProjectile;
 
 	FGameplayTag Combat_Socket_Weapon;
+	FGameplayTag Combat_Socket_Fist_Right;
+	FGameplayTag Combat_Socket_Fist_Left;
 
+	FGameplayTag Event_Montage_Attack_Fist_Left;
+	FGameplayTag Event_Montage_Attack_Fist_Right;
+	
 	FGameplayTag Ability_Attack;
 private:
 	static FSGameplayTags GameplayTags;

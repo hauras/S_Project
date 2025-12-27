@@ -29,7 +29,8 @@ protected:
 private:
 
 	UFUNCTION()
-	void HandleDamageEvent(FGameplayEventData Payload);
+	virtual void HandleDamageEvent(FGameplayEventData Payload);
+	
 	UFUNCTION()
 	void OnMontageEnded();
 

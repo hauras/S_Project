@@ -58,6 +58,7 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 			{
 				CombatInterface->Die();
 			}
+			return;
 		}
 		else
 		{

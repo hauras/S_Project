@@ -66,14 +66,11 @@ void ABossCharacter::MulticastHandleDeath_Implementation()
 	// 1. 죽음 몽타주 재생 (부모 클래스 로직 실행)
 	Super::MulticastHandleDeath_Implementation();
 
-	// 2. ★ 수정 포인트: 3.35초 대신 3.0초~3.1초 정도로 앞당깁니다.
-	// 몽타주가 끝나고 Idle로 돌아가려고 하기 '직전'에 고정해야 "일어나는 현상"이 없습니다.
 	const float DeathAnimDuration = 3.1f; 
 
 	FTimerHandle DeathEffectTimerHandle;
 	GetWorldTimerManager().SetTimer(DeathEffectTimerHandle, [this]()
 	{
-		// A. 쓰러진 포즈 그대로 고정 (몽타주 도중에 멈추므로 Idle 팝업 방지)
 		if (GetMesh())
 		{
 			GetMesh()->bPauseAnims = true;
@@ -101,7 +98,7 @@ void ABossCharacter::MulticastHandleDeath_Implementation()
 		}
 
 	}, DeathAnimDuration, false);
-}
+} 
 
 void ABossCharacter::UpdateHitFxSwitch(float HitFxValue)
 {
@@ -114,23 +111,18 @@ void ABossCharacter::UpdateHitFxSwitch(float HitFxValue)
 
 void ABossCharacter::UpdateDeathDissolve(float DissolveValue)
 {
-	// 1. 머티리얼을 서서히 투명하게 만듦
 	if (BodyMID)
 	{
 		BodyMID->SetScalarParameterValue(FName("DissolveAmount"), DissolveValue);
 	}
 
-	// 2. 나이아가라 이펙트에게 현재 디졸브 진행도를 전달
 	if (DeathNiagaraComp)
 	{
-		// 나이아가라 에디터 하단 'User Parameters'에 정의된 이름과 똑같아야 합니다.
-		// 보통 이런 이펙트는 "User.DissolveAmount"나 "User.Progress" 같은 이름을 씁니다.
 		DeathNiagaraComp->SetNiagaraVariableFloat(TEXT("User.DissolveAmount"), DissolveValue);
 	}
 }
 
 void ABossCharacter::OnDissolveTimelineFinished()
 {
-	// 모든 연출이 끝났으므로 월드에서 제거
 	Destroy();
 }
