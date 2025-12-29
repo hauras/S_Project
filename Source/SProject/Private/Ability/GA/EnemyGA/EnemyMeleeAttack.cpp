@@ -59,7 +59,7 @@ void UEnemyMeleeAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	UAbilityTask_WaitGameplayEvent* EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, DamageEventTag);
+	UAbilityTask_WaitGameplayEvent* EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, DamageEventTag, nullptr, false, false);
 	if (EventTask)
 	{
 		EventTask->EventReceived.AddDynamic(this, &UEnemyMeleeAttack::HandleDamageEvent);
