@@ -55,6 +55,13 @@ void ASPlayerController::SetupInputComponent()
 
 void ASPlayerController::Move_Input(const FInputActionValue& InputAction)
 {
+
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FSGameplayTags::Get().State_Stun))
+	{
+		// 기절 중이면 아래의 이동 로직을 아예 실행하지 않음
+		return;
+	}
+	
 	const FVector2D InputAxisVector = InputAction.Get<FVector2D>();
 	const FRotator Rotation = GetControlRotation();
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);

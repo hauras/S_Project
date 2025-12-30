@@ -19,4 +19,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	float DamageRadius = 210.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tag")
+	TSubclassOf<UGameplayEffect> StateEffectClass;
 };

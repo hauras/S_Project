@@ -42,7 +42,6 @@ void UBossMeleeAttack::HandleDamageEvent(FGameplayEventData Payload)
 	// 5. 탐지 결과를 담을 빈 배열을 만듭니다.
 	TArray<AActor*> OverlappingActors;
 
-	// 6. '만능 탐지기'를 호출하여, 해당 주먹의 위치와 반경 내의 살아있는 모든 적을 찾아냅니다.
 	USAbilityFunctionLibrary::GetLivePlayersWithinRadius(
 		this,                  // World Context
 		OverlappingActors,
@@ -60,6 +59,16 @@ void UBossMeleeAttack::HandleDamageEvent(FGameplayEventData Payload)
 			if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor))
 			{
 				TargetASC->ApplyGameplayEffectSpecToSelf(*DamageSpecHandle.Data.Get());
+
+				FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
+				FGameplayEffectSpecHandle EffectSpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(StateEffectClass, GetAbilityLevel(), ContextHandle);
+
+				if (EffectSpecHandle.IsValid()) 
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Attempting to apply Stun to Target!")); // 이 로그가 뜨는지 확인
+
+					TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+				}
 			}
 		}
 	}

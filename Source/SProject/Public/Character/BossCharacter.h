@@ -44,6 +44,9 @@ protected:
 
 	UPROPERTY()
 	UNiagaraComponent* DeathNiagaraComp;
+
+	
+	
 private:
 	UFUNCTION()
 	void UpdateHitFxSwitch(float HitFxSwitch);

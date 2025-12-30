@@ -40,6 +40,12 @@ public:
 	FGameplayTag Event_Montage_Attack_Fist_Right;
 	
 	FGameplayTag Ability_Attack;
+
+	FGameplayTag Ability_Attack_Boss_Melee1;
+	FGameplayTag Ability_Attack_Boss_Melee2;
+	FGameplayTag Ability_Attack_Boss_Melee3;
+
+	FGameplayTag State_Stun;
 private:
 	static FSGameplayTags GameplayTags;
 };

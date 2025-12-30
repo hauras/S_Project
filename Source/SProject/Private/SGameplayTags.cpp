@@ -36,5 +36,10 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	
 	GameplayTags.Ability_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack"), FString("Attack"));
 
-	
+	GameplayTags.Ability_Attack_Boss_Melee1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack.Boss.Melee1"), FString("Ability_Attack_Boss_Melee1"));
+	GameplayTags.Ability_Attack_Boss_Melee2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack.Boss.Melee2"), FString("Ability_Attack_Boss_Melee2"));
+	GameplayTags.Ability_Attack_Boss_Melee3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack.Boss.Melee3"), FString("Ability_Attack_Boss_Melee3"));
+
+	GameplayTags.State_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Stun"), FString("Stun"));
+
 }
