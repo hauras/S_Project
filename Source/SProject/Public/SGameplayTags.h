@@ -44,7 +44,10 @@ public:
 	FGameplayTag Ability_Attack_Boss_Melee1;
 	FGameplayTag Ability_Attack_Boss_Melee2;
 	FGameplayTag Ability_Attack_Boss_Melee3;
-
+	
+	FGameplayTag Ability_Summon;
+	FGameplayTag Event_Montage_Summon;
+	
 	FGameplayTag State_Stun;
 private:
 	static FSGameplayTags GameplayTags;
