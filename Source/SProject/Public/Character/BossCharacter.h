@@ -17,6 +17,8 @@ public:
 	
 	void PlayHitReactEffect();
 
+	UPROPERTY()
+	bool bHasSummoned = false;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Die() override;
@@ -45,8 +47,8 @@ protected:
 	UPROPERTY()
 	UNiagaraComponent* DeathNiagaraComp;
 
-	
-	
+
+
 private:
 	UFUNCTION()
 	void UpdateHitFxSwitch(float HitFxSwitch);

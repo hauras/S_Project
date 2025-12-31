@@ -2,8 +2,10 @@
 #include "Ability/SAttributeSet.h"
 #include "Net/UnrealNetwork.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AIController.h"
 #include "GameplayEffectExtension.h"
 #include "SGameplayTags.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Character/BossCharacter.h"
 #include "GameFramework/Character.h"
 #include "Interface/CombatInterface.h"
@@ -46,35 +48,49 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
-		// 2. 데미지가 적용된 후의 현재 체력 값을 가져옵니다.
 		const float NewHealth = GetHealth();
+		const float NewMaxHealth = GetMaxHealth();
 		bool bFatal = NewHealth <= 0.f;
 
-		// 3. 데미지가 치명적이지 않은 경우에만 HitReact 어빌리티를 발동시킵니다.
 		if (bFatal)
 		{
-			ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
-			if (CombatInterface)
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
 			{
 				CombatInterface->Die();
 			}
 			return;
 		}
-		else
+
+		// 1. 보스인지 먼저 확인하여 변수에 담아둡니다.
+		ABossCharacter* Boss = Cast<ABossCharacter>(Props.TargetAvatarActor);
+
+		if (Boss)
 		{
-			if (ABossCharacter* Boss = Cast<ABossCharacter>(Props.TargetAvatarActor))
+			// 보스용 피격 효과 실행
+			Boss->PlayHitReactEffect();
+
+			// 2. 소환 페이즈 체크 (MaxHealth가 0보다 클 때만)
+			if (!Boss->bHasSummoned && NewMaxHealth > 0.f)
 			{
-				// '보스'가 맞다면, '디졸브 피격 효과'를 재생하는 함수를 호출합니다.
-				Boss->PlayHitReactEffect();
+				float HealthPercent = NewHealth / NewMaxHealth;
+				if (HealthPercent <= 0.5f)
+				{
+					Boss->bHasSummoned = true;
+					if (AAIController* AIC = Cast<AAIController>(Boss->GetController()))
+					{
+						if (UBlackboardComponent* BB = AIC->GetBlackboardComponent())
+						{
+							BB->SetValueAsBool(FName("WantToSummon"), true);
+						}
+					}
+				}
 			}
-			// 2-B. 만약 '보스'가 아니라면 (즉, 일반 몬스터나 플레이어라면)...
-			else
-			{
-				// 기존처럼 '애니메이션 기반 HitReact' 어빌리티를 발동시킵니다.
-				FGameplayTagContainer TagContainer;
-				TagContainer.AddTag(FSGameplayTags::Get().Ability_HitReact);
-				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
-			}
+		}
+		else // 보스가 아닌 일반 몬스터/플레이어
+		{
+			FGameplayTagContainer TagContainer;
+			TagContainer.AddTag(FSGameplayTags::Get().Ability_HitReact);
+			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 		}
 	}
 }
