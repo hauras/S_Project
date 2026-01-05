@@ -5,6 +5,8 @@
 #include "GameFramework/HUD.h"
 #include "SHUD.generated.h"
 
+class UItemDataAsset;
+class UItemPickupWidgetController;
 class UAttributeSet;
 class UAbilitySystemComponent;
 class UOverlayWidgetController;
@@ -27,6 +29,10 @@ public:
 
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
 
+	UItemPickupWidgetController* GetItemPickupWidgetController(const FWidgetControllerParams& Params);
+
+	void ShowItemPickupWidget(const TArray<UItemDataAsset*>& Items, AActor* TargetBox);
+
 	/*UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
 	void ShowBossHealthBar(AActor* BossActor, const FString& BossName);
 
@@ -41,5 +47,14 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
+
+	UPROPERTY(EditAnywhere, Category = "Widget")
+	TSubclassOf<USUserWidgetBase> ItemPickupWidgetClass;
 	
+	UPROPERTY()
+	TObjectPtr<UItemPickupWidgetController> ItemPickupWidgetController;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UItemPickupWidgetController> ItemPickupWidgetControllerClass;
+
 };

@@ -35,13 +35,17 @@ private:
 
 	void Move_Input(const FInputActionValue& InputAction);
 	void Look_Input(const FInputActionValue& InputAction);
-
+	void Interact_Input(const FInputActionValue& InputAction);
+	
 	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputAction> MoveAction;
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputAction> LookAction;
-	
+
+	UPROPERTY(EditAnywhere, Category="Input")
+	TObjectPtr<UInputAction> InteractAction;
+
 	UPROPERTY()
 	TObjectPtr<USInputComponent> MyInputComponent;
 

@@ -12,6 +12,7 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Space = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Space"), FString("InputTag_Space"));
 	GameplayTags.InputTag_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.1"), FString("InputTag_1"));
 	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.2"), FString("InputTag_2"));
+	GameplayTags.InputTag_Interact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Interact"), FString("Interact"));
 
 	
 	GameplayTags.Ability_Skill_BasicAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.BasicAttack"), FString("BasicAttack"));
@@ -32,7 +33,6 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	
 	GameplayTags.Event_Montage_Attack_Fist_Right = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Event.Montage.Attack.Fist.Right"), FString("Event_Montage_Attack_Fist_Right"));
 	GameplayTags.Event_Montage_Attack_Fist_Left = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Event.Montage.Attack.Fist.Left"), FString("Event_Montage_Attack_Fist_Left"));
-
 	
 	GameplayTags.Ability_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack"), FString("Attack"));
 

@@ -23,7 +23,6 @@ UAbilityTask_SpawnEnemy* UAbilityTask_SpawnEnemy::SpawnEnemies(UGameplayAbility*
 
 void UAbilityTask_SpawnEnemy::Activate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SpawnEnemy Task Activated!"));
 
 	FGameplayEventMulticastDelegate& Delegate = AbilitySystemComponent->GenericGameplayEventCallbacks.FindOrAdd(CachedEventTag);	
 
@@ -42,7 +41,6 @@ void UAbilityTask_SpawnEnemy::OnGameplayEventReceived(const FGameplayEventData* 
 {
 	UClass* LoadedClass = CachedEnemyClassToSpawn.LoadSynchronous();
 	
-	// 안전장치: 로드 실패나 방송 불가 상태면 종료
 	if (!LoadedClass || !ShouldBroadcastAbilityTaskDelegates()) 
 	{
 		EndTask();
@@ -59,7 +57,6 @@ void UAbilityTask_SpawnEnemy::OnGameplayEventReceived(const FGameplayEventData* 
 	{
 		FVector FinalLocation = CachedSpawnOrigin; // 기본값은 보스 위치
 
-		// ★ 강의 방식: 실제 갈 수 있는 랜덤 위치 찾기
 		if (NavSys)
 		{
 			FNavLocation NavLocation;
@@ -69,7 +66,6 @@ void UAbilityTask_SpawnEnemy::OnGameplayEventReceived(const FGameplayEventData* 
 			}
 		}
 
-		// 공중에 살짝 띄워서 소환 (충돌 방지용)
 		FinalLocation.Z += 100.f; 
 
 		FActorSpawnParameters Params;
@@ -77,7 +73,6 @@ void UAbilityTask_SpawnEnemy::OnGameplayEventReceived(const FGameplayEventData* 
 
 		if (AEnemyCharacter* NewEnemy = World->SpawnActor<AEnemyCharacter>(LoadedClass, FinalLocation, CachedSpawnRotator, Params))
 		{
-			// ★ 소환 직후 강제로 떨어지게 만들기 (공중 부양 방지)
 			SpawnedList.Add(NewEnemy);
 		}
 	}

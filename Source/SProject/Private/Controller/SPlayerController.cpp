@@ -7,6 +7,7 @@
 #include "Ability/SAbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Blueprint/UserWidget.h"
+#include "Character/PlayerCharacter.h"
 
 ASPlayerController::ASPlayerController()
 {
@@ -49,6 +50,8 @@ void ASPlayerController::SetupInputComponent()
 	// 바인딩 로직: 컨트롤러의 콜백 함수와 연결합니다.
 	MyInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASPlayerController::Move_Input);
 	MyInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASPlayerController::Look_Input);
+	MyInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ASPlayerController::Interact_Input);
+
 	MyInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 
 }
@@ -88,6 +91,20 @@ void ASPlayerController::Look_Input(const FInputActionValue& InputAction)
 	if (LookAxisVector.Y != 0.f)
 	{
 		AddPitchInput(LookAxisVector.Y);
+	}
+}
+
+void ASPlayerController::Interact_Input(const FInputActionValue& InputAction)
+{
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn());
+
+	if (PlayerCharacter)
+	{
+		if (PlayerCharacter->GetTarget() != nullptr)
+		{
+			IInteractionInterface::Execute_Interact(PlayerCharacter->GetTarget(), PlayerCharacter);
+			
+		}
 	}
 }
 
