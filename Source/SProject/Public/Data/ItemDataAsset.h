@@ -24,7 +24,9 @@ class SPROJECT_API UItemDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
-
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> ItemEffectClass;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText ItemName;
@@ -35,8 +37,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UTexture2D> ItemIcon;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<UGameplayEffect> ItemEffectClass;
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EItemType ItemType;

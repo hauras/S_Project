@@ -25,6 +25,9 @@ public:
 	ASPlayerController();
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
+
+	void SetCrosshairVisibility(bool bVisible);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -36,7 +39,8 @@ private:
 	void Move_Input(const FInputActionValue& InputAction);
 	void Look_Input(const FInputActionValue& InputAction);
 	void Interact_Input(const FInputActionValue& InputAction);
-	
+	void Inventory_Input(const FInputActionValue& InputAction);
+
 	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputAction> MoveAction;
 
@@ -45,6 +49,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputAction> InteractAction;
+
+	UPROPERTY(EditAnywhere, Category="Input")
+	TObjectPtr<UInputAction> InventoryAction;
 
 	UPROPERTY()
 	TObjectPtr<USInputComponent> MyInputComponent;

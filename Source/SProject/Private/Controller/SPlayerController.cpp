@@ -8,6 +8,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/PlayerCharacter.h"
+#include "UI/HUD/SHUD.h"
 
 ASPlayerController::ASPlayerController()
 {
@@ -17,6 +18,16 @@ ASPlayerController::ASPlayerController()
 FGenericTeamId ASPlayerController::GetGenericTeamId() const
 {
 	return PlayerTeamId;
+}
+
+void ASPlayerController::SetCrosshairVisibility(bool bVisible)
+{
+	if (CrosshairWidgetClassInstance)
+	{
+		// true면 Visible, false면 Collapsed(숨김+공간차지X)
+		ESlateVisibility NewVisibility = bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+		CrosshairWidgetClassInstance->SetVisibility(NewVisibility);
+	}
 }
 
 void ASPlayerController::BeginPlay()
@@ -37,6 +48,7 @@ void ASPlayerController::BeginPlay()
 		if (CrosshairWidgetClassInstance)
 		{
 			CrosshairWidgetClassInstance->AddToViewport();
+			
 		}
 	}
 }
@@ -47,11 +59,12 @@ void ASPlayerController::SetupInputComponent()
 
 	MyInputComponent = CastChecked<USInputComponent>(InputComponent);
 
-	// 바인딩 로직: 컨트롤러의 콜백 함수와 연결합니다.
 	MyInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASPlayerController::Move_Input);
 	MyInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASPlayerController::Look_Input);
 	MyInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ASPlayerController::Interact_Input);
+	MyInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &ASPlayerController::Inventory_Input);
 
+	
 	MyInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 
 }
@@ -61,7 +74,6 @@ void ASPlayerController::Move_Input(const FInputActionValue& InputAction)
 
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FSGameplayTags::Get().State_Stun))
 	{
-		// 기절 중이면 아래의 이동 로직을 아예 실행하지 않음
 		return;
 	}
 	
@@ -105,6 +117,17 @@ void ASPlayerController::Interact_Input(const FInputActionValue& InputAction)
 			IInteractionInterface::Execute_Interact(PlayerCharacter->GetTarget(), PlayerCharacter);
 			
 		}
+	}
+}
+
+void ASPlayerController::Inventory_Input(const FInputActionValue& InputAction)
+{
+
+	ASHUD* SHUD = Cast<ASHUD>(GetHUD());
+
+	if (SHUD)
+	{
+		SHUD->ToggleInventory();
 	}
 }
 

@@ -17,6 +17,7 @@ public:
 	FGameplayTag InputTag_1;
 	FGameplayTag InputTag_2;
 	FGameplayTag InputTag_Interact;
+	FGameplayTag InputTag_Inventory;
 	
 	FGameplayTag Vital_Health;
 	FGameplayTag Vital_Mana;

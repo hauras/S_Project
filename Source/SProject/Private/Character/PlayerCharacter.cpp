@@ -73,19 +73,6 @@ void APlayerCharacter::PerformInteractionTrace()
 	AActor* HitActor = HitResult.GetActor();
 	IInteractionInterface* Interface = Cast<IInteractionInterface>(HitActor);
 	
-	FColor LineColor = bHit ? FColor::Green : FColor::Red;
-
-	DrawDebugLine(
-		GetWorld(),
-		Start,           // 시작점 (카메라 위치)
-		End,             // 끝점
-		LineColor,       // 선 색상
-		false,           // 영구 지속 여부 (매 프레임 그리므로 false)
-		0.1f,            // 선이 머무는 시간
-		0,               // 우선순위
-		1.0f             // 선 두께
-	);
-	
 	if (bHit && Interface)
 	{
 		if (HitActor != Target) // 보고 있는 놈이 바뀌었다면
@@ -128,6 +115,8 @@ void APlayerCharacter::InitAbilityActorInfo()
 		if (ASHUD* SHUD = Cast<ASHUD>(SPlayerController->GetHUD()))
 		{
 			SHUD->InitOverlay(SPlayerController, SPlayerState, AbilitySystemComponent, AttributeSet);
+			SHUD->InitInventory(SPlayerController, SPlayerState, AbilitySystemComponent, AttributeSet);
+
 		}
 	}
 }

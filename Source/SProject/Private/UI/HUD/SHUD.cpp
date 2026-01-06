@@ -7,6 +7,8 @@
 #include "UI/SUserWidgetBase.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "UI/WidgetController/ItemPickupWidgetController.h" // 헤더 추가 필수!
+#include "UI/WidgetController/InventoryWidgetController.h"
+#include "Controller/SPlayerController.h"
 
 UOverlayWidgetController* ASHUD::GetOverlayWidgetController(const FWidgetControllerParams& Params)
 {
@@ -60,28 +62,80 @@ void ASHUD::ShowItemPickupWidget(const TArray<UItemDataAsset*>& Items, AActor* T
 
 	if (PS)
 	{
-		// 2. PS 안에 이미 만들어두신 함수들을 사용해 ASC와 AS를 가져옵니다.
 		UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
 		UAttributeSet* AS = PS->GetAttributeSet();
 
-		// 3. 이제 모든 재료가 모였으니 파라미터 세트를 만듭니다.
 		const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
 
-		// 4. 이 파라미터로 컨트롤러를 가져옵니다.
 		UItemPickupWidgetController* WidgetController = GetItemPickupWidgetController(WidgetControllerParams);
 
-		// 5. 상자 데이터를 주입합니다.
 
-		// 6. 위젯 생성 및 화면 표시 (이전과 동일)
 		LootWidget->SetWidgetController(WidgetController);
 		WidgetController->SetLootItems(Items, TargetBox);
 
 		LootWidget->AddToViewport();
 
-		// 7. 마우스 커서 활성화
 		PC->SetShowMouseCursor(true);
 		PC->SetInputMode(FInputModeGameAndUI());
 	}
+}
+
+void ASHUD::InitInventory(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)
+{
+	if (InventoryWidgetClass == nullptr) return;
+
+	// 위젯 생성
+	InventoryWidget = CreateWidget<USUserWidgetBase>(GetWorld(), InventoryWidgetClass);
+
+	// 컨트롤러 설정
+	const FWidgetControllerParams Params(PC, PS, ASC, AS);
+	UInventoryWidgetController* WidgetController = GetInventoryWidgetController(Params);
+    
+	InventoryWidget->SetWidgetController(WidgetController);
+    
+	// 처음에 가방은 숨겨둔 상태로 화면에 붙여만 둡니다.
+	InventoryWidget->AddToViewport();
+	InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+    
+	// [중요] 초기 아이템 목록 방송!
+	WidgetController->BroadcastInitialValues();
+}
+
+void ASHUD::ToggleInventory()
+{
+
+	if (!InventoryWidget) return;
+
+	ASPlayerController* PC = Cast<ASPlayerController>(GetOwningPlayerController());
+    
+	// 현재 가방이 보이는지 확인
+	bool bIsVisible = InventoryWidget->GetVisibility() == ESlateVisibility::Visible;
+
+	if (bIsVisible)
+	{
+		InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+		PC->SetShowMouseCursor(false);
+		PC->SetInputMode(FInputModeGameOnly()); 
+		PC->SetCrosshairVisibility(true);
+	}
+	else
+	{
+		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+		PC->SetShowMouseCursor(true);
+		PC->SetInputMode(FInputModeGameAndUI());
+		PC->SetCrosshairVisibility(false);
+	}
+}
+
+UInventoryWidgetController* ASHUD::GetInventoryWidgetController(const struct FWidgetControllerParams& Params)
+{
+	if (InventoryWidgetController == nullptr)
+	{
+		InventoryWidgetController = NewObject<UInventoryWidgetController>(this, InventoryWidgetControllerClass);
+		InventoryWidgetController->SetWidgetControllerParams(Params);
+		InventoryWidgetController->BindCallbacksToDependencies();
+	}
+	return InventoryWidgetController;
 }
 
 
