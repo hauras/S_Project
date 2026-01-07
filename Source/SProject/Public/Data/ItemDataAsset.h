@@ -12,7 +12,19 @@ enum class EItemType : uint8
 {
 	Potion, // 소모형
 	Scroll, // 강화/버프
-	Quest, // 열쇠 등
+	Quest,
+	Equipment
+};
+
+UENUM(BlueprintType)
+enum class EEquipmentSlot : uint8
+{
+	None,
+	Weapon,
+	Head,
+	Chest,
+	Legs,
+	Feet
 };
 
 
@@ -27,6 +39,11 @@ class SPROJECT_API UItemDataAsset : public UPrimaryDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> ItemEffectClass;
+
+	EItemType GetItemType() const { return ItemType; }
+
+	EEquipmentSlot GetEquipmentSlot() const { return EquipmentSlot; }
+	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText ItemName;
@@ -37,8 +54,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UTexture2D> ItemIcon;
 	
-	
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EItemType ItemType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EEquipmentSlot EquipmentSlot;
 };

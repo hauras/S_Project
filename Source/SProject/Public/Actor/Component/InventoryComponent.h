@@ -4,9 +4,12 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Actor/ItemBase.h"
+#include "Data/ItemDataAsset.h"
 #include "InventoryComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdatedSignature, const TArray<UItemDataAsset*>&, InventoryItems);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdatedSignature, const TArray<UItemDataAsset*>&,InventoryItems);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquipmentChangedSignature, EEquipmentSlot, Slot, UItemDataAsset*, ItemData);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SPROJECT_API UInventoryComponent : public UActorComponent
@@ -23,6 +26,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Inventory")
 	FOnInventoryUpdatedSignature OnInventoryUpdated;
 
+	UPROPERTY(BlueprintAssignable, Category="Inventory")
+	FOnEquipmentChangedSignature OnEquipmentChanged;
+
+	UPROPERTY()
+	TMap<EEquipmentSlot, TObjectPtr<UItemDataAsset>> EquippedItems;
+	
 	void UseItem(UItemDataAsset* ItemData);
 protected:
 

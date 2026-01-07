@@ -22,27 +22,40 @@ void UInventoryComponent::UseItem(UItemDataAsset* ItemData)
 {
 	if (ItemData && Inventory.Contains(ItemData))
 	{
-		AActor* MyOwner = GetOwner();
-
-		// 2. 라이브러리 도구를 써서 주인의 ASC를 가져옵니다.
-		UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(MyOwner);
-
-		if (ASC)
+		// [1] 장비 아이템인 경우
+		if (ItemData->GetItemType() == EItemType::Equipment)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("주인의 ASC를 찾았습니다: %s"), *ASC->GetName());
+			EEquipmentSlot Slot = ItemData->GetEquipmentSlot();
 
-			FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
-			FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(ItemData->ItemEffectClass, 1.f, ContextHandle);
-			if (SpecHandle.IsValid()) 
+			if (EquippedItems.Contains(Slot))
 			{
-				ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-				Inventory.RemoveSingle(ItemData);
-
-				// [3] UI 새로고침 방송
-				OnInventoryUpdated.Broadcast(Inventory);
+				Inventory.Add(EquippedItems[Slot]); // 옛날 템 가방행
 			}
 
+			// 새 템 장착
+			EquippedItems.Add(Slot, ItemData);
+            
+			// 장착 UI에게 알림
+			OnEquipmentChanged.Broadcast(Slot, ItemData);
 		}
+		// [2] 소모품(포션 등)인 경우
+		else
+		{
+			AActor* MyOwner = GetOwner();
+			UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(MyOwner);
+
+			if (ASC)
+			{
+				FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
+				FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(ItemData->ItemEffectClass, 1.f, ContextHandle);
+				if (SpecHandle.IsValid()) 
+				{
+					ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+				}
+			}
+		}
+		Inventory.RemoveSingle(ItemData);
+		OnInventoryUpdated.Broadcast(Inventory);
 	}
 }
 
