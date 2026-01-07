@@ -6,18 +6,15 @@ void UInventoryWidgetController::BroadcastInitialValues()
 {
 	Super::BroadcastInitialValues();
 
-	// 조종 중인 캐릭터를 가져옵니다.
 	APawn* ControlledPawn = PlayerController->GetPawn();
 	if (ControlledPawn)
 	{
-		// 가방 컴포넌트를 찾습니다.
 		UInventoryComponent* Inventory = ControlledPawn->FindComponentByClass<UInventoryComponent>();
 		if (Inventory)
 		{
 			InventoryItemsChangedDelegate.Broadcast(Inventory->GetInventoryList()); 
 			for (auto& Pair : Inventory->EquippedItems)
 			{
-				// Pair.Key는 부위(Slot), Pair.Value는 아이템(ItemDataAsset)입니다.
 				EquipmentChangedDelegate.Broadcast(Pair.Key, Pair.Value);
 			}
 		}
@@ -34,7 +31,6 @@ void UInventoryWidgetController::BindCallbacksToDependencies()
 		UInventoryComponent* Inventory = ControlledPawn->FindComponentByClass<UInventoryComponent>();
 		if (Inventory)
 		{
-			// 가방 데이터가 변할 때마다(추가/삭제) 내 귀(Callback 함수)로 들려달라고 예약합니다.
 			Inventory->OnInventoryUpdated.AddDynamic(this, &UInventoryWidgetController::OnInventoryUpdatedCallback);
 			Inventory->OnEquipmentChanged.AddDynamic(this, &UInventoryWidgetController::OnEquipmentChangedCallback);
 
@@ -51,8 +47,6 @@ void UInventoryWidgetController::UseItem(UItemDataAsset* ItemAsset)
 		UInventoryComponent* Inventory = ControlledPawn->FindComponentByClass<UInventoryComponent>();
 		if (Inventory && ItemAsset)
 		{
-			// [핵심] 가방 컴포넌트에게 "이 아이템 진짜로 사용해!"라고 명령을 전달합니다.
-			// 그러면 우리가 어제 짰던 [효과 적용 -> 소모 -> 다시 방송] 로직이 실행됩니다.
 			Inventory->UseItem(ItemAsset);
 		}
 	}
@@ -60,7 +54,6 @@ void UInventoryWidgetController::UseItem(UItemDataAsset* ItemAsset)
 
 void UInventoryWidgetController::OnInventoryUpdatedCallback(const TArray<UItemDataAsset*>& Items)
 {
-	// 가방에서 온 소식을 그대로 UI(델리게이트)에게 전달합니다.
 	InventoryItemsChangedDelegate.Broadcast(Items);
 }
 
