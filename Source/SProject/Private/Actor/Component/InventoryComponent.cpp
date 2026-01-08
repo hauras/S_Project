@@ -26,7 +26,25 @@ void UInventoryComponent::UseItem(UItemDataAsset* ItemData)
 		if (ItemData->GetItemType() == EItemType::Equipment)
 		{
 			EEquipmentSlot Slot = ItemData->GetEquipmentSlot();
+			UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
 
+			if (EquipmentEffectHandles.Contains(Slot))
+			{
+				ASC->RemoveActiveGameplayEffect(EquipmentEffectHandles[Slot]);
+			}
+			
+			if (ItemData->ItemEffectClass && ASC)
+			{
+				FGameplayEffectContextHandle Context = ASC->MakeEffectContext();
+				FGameplayEffectSpecHandle Spec = ASC->MakeOutgoingSpec(ItemData->ItemEffectClass, 1.f, Context);
+        
+				// 영구 지속(Infinite) 이펙트를 적용하고 영수증(Handle)을 받습니다.
+				FActiveGameplayEffectHandle NewHandle = ASC->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+        
+				// 나중에 무기 벗을 때 쓰려고 영수증을 저장해둡니다.
+				EquipmentEffectHandles.Add(Slot, NewHandle);
+			}
+			
 			if (EquippedItems.Contains(Slot))
 			{
 				Inventory.Add(EquippedItems[Slot]); // 옛날 템 가방행

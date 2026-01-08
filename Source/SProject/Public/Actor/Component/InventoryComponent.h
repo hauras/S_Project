@@ -2,13 +2,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "Components/ActorComponent.h"
 #include "Actor/ItemBase.h"
 #include "Data/ItemDataAsset.h"
 #include "InventoryComponent.generated.h"
 
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdatedSignature, const TArray<UItemDataAsset*>&,InventoryItems);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdatedSignature, const TArray<UItemDataAsset*>&,
+                                            InventoryItems);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquipmentChangedSignature, EEquipmentSlot, Slot, UItemDataAsset*, ItemData);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -38,5 +39,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TArray<TObjectPtr<UItemDataAsset>> Inventory;
 
-	
+	UPROPERTY()
+	TMap<EEquipmentSlot, FActiveGameplayEffectHandle> EquipmentEffectHandles;
 };
