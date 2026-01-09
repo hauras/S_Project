@@ -81,6 +81,10 @@ void ACharacterBase::InitializeDefaultAttributes() const
 	ApplyEffectToSelf(MaxVitalAttributes, 1.f);
 	ApplyEffectToSelf(VitalAttributes, 1.f);
 
+	if (RegenEffectClass)
+	{
+		ApplyEffectToSelf(RegenEffectClass, 1.f);
+	}
 }
 
 void ACharacterBase::InitAbilityActorInfo()

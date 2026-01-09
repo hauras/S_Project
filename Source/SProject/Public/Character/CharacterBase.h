@@ -65,6 +65,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	bool bIsDead = false;
+
+	UPROPERTY(EditAnywhere, Category = "Attributes")
+	TSubclassOf<UGameplayEffect> RegenEffectClass;
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")
