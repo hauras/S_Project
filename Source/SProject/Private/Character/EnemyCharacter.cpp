@@ -13,6 +13,7 @@
 #include "UI/SUserWidgetBase.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameMode/SGameMode.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -139,6 +140,16 @@ void AEnemyCharacter::Die()
 {
 	SetLifeSpan(LifeSpan);
 	Super::Die();
+
+	if (HasAuthority())
+	{
+		ASGameMode* GameMode = GetWorld()->GetAuthGameMode<ASGameMode>();
+		if (GameMode)
+		{
+			GameMode->OnEnemyKilled();
+		}
+	}
+	
 }
 
 void AEnemyCharacter::SetCombatTarget_Implementation(AActor* InCombatTarget)

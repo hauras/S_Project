@@ -33,6 +33,9 @@ protected:
 	TObjectPtr<AActor> Target;
 
 	void PerformInteractionTrace();
+
+	void LoadProgressFromGameInstance(); 
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArm;

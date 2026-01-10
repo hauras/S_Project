@@ -17,4 +17,17 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = " Enemy Info")
 	TObjectPtr<UEnemyStats> EnemyInfo;
+
+	void OnEnemyKilled();
+
+protected:
+
+	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Stage Rules")
+	int32 EnemyCount = 0;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stage Rules")
+	TSubclassOf<AActor> PortalClass;
+
 };

@@ -12,6 +12,8 @@
 #include "Actor/Component/InventoryComponent.h"
 
 #include "DrawDebugHelpers.h" // 이 줄을 맨 위에 추가하세요.
+#include "Ability/SAttributeSet.h"
+#include "Instance/SGameInstance.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -39,8 +41,13 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	
 	InitAbilityActorInfo(); 
 	
+	// 2. 스킬 부여
 	AddCharacterAbilities();
+
+	// 3. 기본 스탯 
 	InitializeDefaultAttributes();
+
+	LoadProgressFromGameInstance(); 
 }
 
 void APlayerCharacter::OnRep_PlayerState()
@@ -48,6 +55,9 @@ void APlayerCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	InitAbilityActorInfo();
+
+	LoadProgressFromGameInstance(); 
+
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -75,29 +85,54 @@ void APlayerCharacter::PerformInteractionTrace()
 	
 	if (bHit && Interface)
 	{
-		if (HitActor != Target) // 보고 있는 놈이 바뀌었다면
+		if (HitActor != Target) 
 		{
-			// [1] 이전에 보던 놈이 있었다면 꺼줍니다.
 			if (Target)
 			{
 				IInteractionInterface::Execute_HideInteractionWidget(Target);
 			}
 
-			// [2] 이제 새로운 대상을 기억합니다.
 			Target = HitActor;
 
-			// [3] 새로운 대상의 위젯을 켜줍니다.
 			IInteractionInterface::Execute_ShowInteractionWidget(Target);
 		}
 	}
-	else // 아무것도 안 맞았거나, 인터페이스가 없는 물체라면
+	else 
 	{
-		// [4] 이전에 보던 놈이 아직 남아있다면 정리합니다.
 		if (Target)
 		{
 			IInteractionInterface::Execute_HideInteractionWidget(Target);
-			Target = nullptr; // 이제 아무것도 안 보고 있으니 비워줍니다.
+			Target = nullptr; 
 		}
+	}
+}
+
+void APlayerCharacter::LoadProgressFromGameInstance()
+{
+	USGameInstance* GI = Cast<USGameInstance>(GetGameInstance());
+	if (GI && GI->PlayerData.bIsDataValid)
+	{
+		UInventoryComponent* InvComp = FindComponentByClass<UInventoryComponent>();
+		USAttributeSet* AS = Cast<USAttributeSet>(AttributeSet);
+
+		if (InvComp && AS)
+		{
+			// 1. [먼저] 장비를 다시 입힙니다. ⭐
+			// 이 함수가 실행되면서 GE가 적용되어 MaxHealth가 100 -> 120으로 자동으로 올라갑니다.
+			InvComp->LoadInventoryData(GI->PlayerData.Inventory, GI->PlayerData.EquippedItems);
+
+			// 2. [그 다음] 현재의 실시간 수치(Health, Mana)만 금고에서 꺼내 덮어씌웁니다.
+			// 이미 장비로 인해 Max가 120이 된 상태이므로, 120을 넣어도 잘리지 않습니다.
+			AS->SetHealth(GI->PlayerData.Health);
+			AS->SetMana(GI->PlayerData.Mana);
+            
+			// 만약 '강화석'으로 올린 순수 공격력이 있다면 그건 따로 처리가 필요하겠지만,
+			// 일단 장비 문제는 이렇게 하면 해결됩니다.
+            
+			UE_LOG(LogTemp, Warning, TEXT("데이터 로드 완료! 현재 체력: %f"), AS->GetHealth());
+		}
+
+		GI->PlayerData.bIsDataValid = false;
 	}
 }
 
@@ -119,4 +154,6 @@ void APlayerCharacter::InitAbilityActorInfo()
 
 		}
 	}
+
+	
 }

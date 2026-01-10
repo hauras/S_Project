@@ -34,6 +34,11 @@ public:
 	TMap<EEquipmentSlot, TObjectPtr<UItemDataAsset>> EquippedItems;
 	
 	void UseItem(UItemDataAsset* ItemData);
+
+	void LoadInventoryData(
+			const TArray<TObjectPtr<UItemDataAsset>>& SavedInventory, 
+			const TMap<EEquipmentSlot, TObjectPtr<UItemDataAsset>>& SavedEquippedItems
+		);
 protected:
 
 	UPROPERTY(EditDefaultsOnly)

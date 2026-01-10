@@ -43,9 +43,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = " Enemy Class Defaults")
 	TMap<EEnemyType, FEnemyClassDefaultInfo> EnemyClassInfo;
-
 	
-
 	FEnemyClassDefaultInfo GetClassDefaultInfo(EEnemyType EnemyClass);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ability")
