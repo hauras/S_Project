@@ -5,6 +5,7 @@
 #include "Actor/Component/InventoryComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "State/SPlayerState.h"
 #include "UI/HUD/SHUD.h"
 
 AItemBase::AItemBase()
@@ -27,6 +28,7 @@ void AItemBase::Interact_Implementation(AActor* InInteractor)
 
  	if (APawn* InteractorPawn = Cast<APawn>(InInteractor))
  	{
+ 		
  		if (APlayerController* PC = Cast<APlayerController>(InteractorPawn->GetController()))
  		{
  			if (ASHUD* HUD = Cast<ASHUD>(PC->GetHUD()))

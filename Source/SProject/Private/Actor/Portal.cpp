@@ -8,6 +8,7 @@
 #include "Instance/SGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
+#include "State/SPlayerState.h"
 
 APortal::APortal()
 {
@@ -26,33 +27,34 @@ APortal::APortal()
 void APortal::Interact_Implementation(AActor* InInteractor)
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InInteractor);
-	USGameInstance* GameInstance = Cast<USGameInstance>(GetGameInstance());
+	USGameInstance* GI = Cast<USGameInstance>(GetGameInstance());
 
-	if (PlayerCharacter && GameInstance)
+	if (PlayerCharacter && GI)
 	{
-		UInventoryComponent* InventoryComponent = PlayerCharacter->FindComponentByClass<UInventoryComponent>();
+		ASPlayerState* PS = Cast<ASPlayerState>(PlayerCharacter->GetPlayerState());
 		const USAttributeSet* AS = Cast<USAttributeSet>(PlayerCharacter->GetAttributeSet());
+		// ★ 중요: 순수 기본값을 가져오기 위해 ASC가 필요합니다.
+		UAbilitySystemComponent* ASC = PlayerCharacter->GetAbilitySystemComponent();
 
-		if (InventoryComponent && AS)
+		if (PS && PS->Inventory && AS && ASC)
 		{
-			GameInstance->PlayerData.Inventory = InventoryComponent->GetInventoryList();
-			GameInstance->PlayerData.EquippedItems = InventoryComponent->EquippedItems; 
-			GameInstance->PlayerData.Health = AS->GetHealth();
-			GameInstance->PlayerData.MaxHealth = AS->GetMaxHealth();
-			GameInstance->PlayerData.Mana = AS->GetMana();
-			GameInstance->PlayerData.MaxMana = AS->GetMaxMana();
-			GameInstance->PlayerData.AttackPower = AS->GetAttackPower();
+			GI->PlayerData.Inventory = PS->Inventory->GetInventoryList();
+			GI->PlayerData.EquippedItems = PS->Inventory->EquippedItems; 
 
-			GameInstance->PlayerData.bIsDataValid = true;
+			GI->PlayerData.MaxHealth = ASC->GetNumericAttributeBase(AS->GetMaxHealthAttribute());
+			GI->PlayerData.MaxMana = ASC->GetNumericAttributeBase(AS->GetMaxManaAttribute());
+			GI->PlayerData.AttackPower = ASC->GetNumericAttributeBase(AS->GetAttackPowerAttribute());
+
+			GI->PlayerData.Health = AS->GetHealth();
+			GI->PlayerData.Mana = AS->GetMana();
+
+			GI->PlayerData.bIsDataValid = true;
 
 			UGameplayStatics::OpenLevel(this, TargetLevelName);
-
-			UE_LOG(LogTemp, Warning, TEXT("데이터 저장 완료! %s 레벨로 이동합니다."), *TargetLevelName.ToString());
-
+			UE_LOG(LogTemp, Warning, TEXT("데이터 저장 완료 (순수 Base 스탯 보존)"));
 		}
 	}
 }
-
 void APortal::ShowInteractionWidget_Implementation()
 {
 	IInteractionInterface::ShowInteractionWidget_Implementation();

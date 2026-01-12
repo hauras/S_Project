@@ -5,6 +5,7 @@
 #include "Ability/SAbilitySystemComponent.h"
 #include "Ability/SAttributeSet.h"
 #include "Net/UnrealNetwork.h"
+#include "Actor/Component/InventoryComponent.h"
 
 ASPlayerState::ASPlayerState()
 {
@@ -13,7 +14,9 @@ ASPlayerState::ASPlayerState()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 	
 	AttributeSet = CreateDefaultSubobject<USAttributeSet>("AttributeSet");
-	
+
+	Inventory = CreateDefaultSubobject<UInventoryComponent>("Inventory");
+
 }
 
 void ASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

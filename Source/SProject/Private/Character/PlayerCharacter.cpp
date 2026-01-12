@@ -32,7 +32,6 @@ APlayerCharacter::APlayerCharacter()
 	Camera->SetupAttachment(SpringArm);
 	Camera->bUsePawnControlRotation = false;
 
-	Inventory = CreateDefaultSubobject<UInventoryComponent>("Inventory");
 }
 
 void APlayerCharacter::PossessedBy(AController* NewController)
@@ -40,14 +39,18 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 	
 	InitAbilityActorInfo(); 
-	
-	// 2. 스킬 부여
 	AddCharacterAbilities();
 
-	// 3. 기본 스탯 
-	InitializeDefaultAttributes();
+	// ★ 수정: 금고 유무와 상관없이 무조건 기본 스탯(100)을 먼저 채웁니다!
+	// 그래야 나중에 로드할 때 Clamp에 안 걸립니다.
+	InitializeDefaultAttributes(); 
 
-	LoadProgressFromGameInstance(); 
+	// 그 다음, 금고에 데이터가 있다면 덮어씌웁니다.
+	USGameInstance* GI = Cast<USGameInstance>(GetGameInstance());
+	if (GI && GI->PlayerData.bIsDataValid)
+	{
+		LoadProgressFromGameInstance();
+	}
 }
 
 void APlayerCharacter::OnRep_PlayerState()
@@ -112,30 +115,28 @@ void APlayerCharacter::LoadProgressFromGameInstance()
 	USGameInstance* GI = Cast<USGameInstance>(GetGameInstance());
 	if (GI && GI->PlayerData.bIsDataValid)
 	{
-		UInventoryComponent* InvComp = FindComponentByClass<UInventoryComponent>();
+		ASPlayerState* PS = GetPlayerState<ASPlayerState>();
 		USAttributeSet* AS = Cast<USAttributeSet>(AttributeSet);
 
-		if (InvComp && AS)
+		if (PS && PS->Inventory && AS)
 		{
-			// 1. [먼저] 장비를 다시 입힙니다. ⭐
-			// 이 함수가 실행되면서 GE가 적용되어 MaxHealth가 100 -> 120으로 자동으로 올라갑니다.
-			InvComp->LoadInventoryData(GI->PlayerData.Inventory, GI->PlayerData.EquippedItems);
+	
+			AS->SetMaxHealth(GI->PlayerData.MaxHealth);
+			AS->SetMaxMana(GI->PlayerData.MaxMana);
+			AS->SetAttackPower(GI->PlayerData.AttackPower);
 
-			// 2. [그 다음] 현재의 실시간 수치(Health, Mana)만 금고에서 꺼내 덮어씌웁니다.
-			// 이미 장비로 인해 Max가 120이 된 상태이므로, 120을 넣어도 잘리지 않습니다.
+		
+			PS->Inventory->LoadInventoryData(GI->PlayerData.Inventory, GI->PlayerData.EquippedItems);
+
+
 			AS->SetHealth(GI->PlayerData.Health);
 			AS->SetMana(GI->PlayerData.Mana);
-            
-			// 만약 '강화석'으로 올린 순수 공격력이 있다면 그건 따로 처리가 필요하겠지만,
-			// 일단 장비 문제는 이렇게 하면 해결됩니다.
-            
-			UE_LOG(LogTemp, Warning, TEXT("데이터 로드 완료! 현재 체력: %f"), AS->GetHealth());
-		}
 
+			UE_LOG(LogTemp, Warning, TEXT("데이터 로드 완료! (중복 합산 방지 적용)"));
+		}
 		GI->PlayerData.bIsDataValid = false;
 	}
 }
-
 void APlayerCharacter::InitAbilityActorInfo()
 {
 	ASPlayerState* SPlayerState = GetPlayerState<ASPlayerState>();

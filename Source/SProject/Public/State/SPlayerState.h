@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "SPlayerState.generated.h"
 
+class UInventoryComponent;
 class UPlayerDataAsset;
 class UAbilitySystemComponent;
 class UAttributeSet;
@@ -36,6 +37,8 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	TObjectPtr<UInventoryComponent> Inventory;
 protected:
 	
 	UPROPERTY()

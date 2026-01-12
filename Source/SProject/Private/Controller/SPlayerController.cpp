@@ -2,18 +2,20 @@
 
 #include "Controller/SPlayerController.h"
 #include "EnhancedInputSubsystems.h"
-#include "Input/SInputComponent.h" // 커스텀 입력 컴포넌트
-#include "SGameplayTags.h" // GameplayTag를 사용하기 위해
+#include "Input/SInputComponent.h" 
+#include "SGameplayTags.h" 
 #include "Ability/SAbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Ability/SAttributeSet.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/PlayerCharacter.h"
 #include "State/SPlayerState.h"
 #include "UI/HUD/SHUD.h"
 #include "UI/Widget/DamageTextComponent.h"
-#include "Data/PlayerDataAsset.h"    // 2. PlayerDataAsset과 그 안의 구조체 정보를 알기 위해 필요
+#include "Data/PlayerDataAsset.h"    
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "Instance/SGameInstance.h"
+#include "Actor/Component/InventoryComponent.h"
 ASPlayerController::ASPlayerController()
 {
 	PlayerTeamId = FGenericTeamId(0);
@@ -48,47 +50,60 @@ void ASPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACh
 void ASPlayerController::Server_RequestCharacterSwap_Implementation(int32 NewIndex)
 {
 	ASPlayerState* PS = GetPlayerState<ASPlayerState>();
-	// 1. [수정] 배열의 인덱스뿐만 아니라, 그 안의 데이터 에셋이 실제로 들어있는지도 확인합니다.
 	if (!PS || !PS->PlayerData.IsValidIndex(NewIndex) || !PS->PlayerData[NewIndex]) return;
 
 	APlayerCharacter* OldCharacter = Cast<APlayerCharacter>(GetPawn());
 	if (!OldCharacter) return;
 
-	// 위치/속도 백업
 	FTransform SpawnTransform = OldCharacter->GetActorTransform();
 	FVector OldVelocity = OldCharacter->GetVelocity();
 
-	// 기존 몸 파괴
+	// 짐 싸기 로직 보강
+	if (USGameInstance* GI = Cast<USGameInstance>(GetGameInstance()))
+	{
+		const USAttributeSet* AS = Cast<USAttributeSet>(OldCharacter->GetAttributeSet());
+		UAbilitySystemComponent* ASC = OldCharacter->GetAbilitySystemComponent();
+
+		if (AS && ASC && PS->Inventory)
+		{
+			GI->PlayerData.Inventory = PS->Inventory->GetInventoryList();
+			GI->PlayerData.EquippedItems = PS->Inventory->EquippedItems;
+
+			// ★ 수정 포인트: 여기서도 Base 수치를 저장합니다.
+			GI->PlayerData.MaxHealth = ASC->GetNumericAttributeBase(AS->GetMaxHealthAttribute());
+			GI->PlayerData.MaxMana = ASC->GetNumericAttributeBase(AS->GetMaxManaAttribute());
+			GI->PlayerData.AttackPower = ASC->GetNumericAttributeBase(AS->GetAttackPowerAttribute());
+
+			GI->PlayerData.Health = AS->GetHealth();
+			GI->PlayerData.Mana = AS->GetMana();
+
+			GI->PlayerData.bIsDataValid = true; 
+		}
+	}
+	
 	UnPossess();
 	OldCharacter->Destroy();
 	
-	// 새 데이터 추출
 	UClass* NewCharacterClass = PS->PlayerData[NewIndex]->CharacterInfo.CharacterClass;
 	FGameplayTag NewCharacterTag = PS->PlayerData[NewIndex]->CharacterInfo.CharacterTag;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 
-	// 2. 새 캐릭터 소환
 	APlayerCharacter* NewCharacter = GetWorld()->SpawnActor<APlayerCharacter>(NewCharacterClass, SpawnTransform, SpawnParams);
 	
 	if (NewCharacter)
 	{
-		// [육체 업데이트] 새 몸에 신분증(태그) 부여
 		NewCharacter->CharacterTag = NewCharacterTag;
-
-		// 3. [영혼 업데이트 ⭐] PlayerState도 현재 어떤 태그인지 동기화합니다.
-		// 이렇게 해야 나중에 UI(초상화 등)가 이 변수를 보고 바뀝니다.
 		PS->CurrentCharacterTag = NewCharacterTag;
 		PS->CurrentCharacterIndex = NewIndex;
 
-		// 빙의
 		Possess(NewCharacter);
 
-		// [GAS 연결] 영혼과 육체의 결합
+		// 여기서 NewCharacter 내부의 InitAbilityActorInfo가 호출되면서 
+		// 아까 GI에 저장한 짐들을 다시 풀게 됩니다.
 		NewCharacter->InitAbilityActorInfo();
 
-		// 관성 전달
 		if (NewCharacter->GetCharacterMovement())
 		{
 			NewCharacter->GetCharacterMovement()->Velocity = OldVelocity;
@@ -96,7 +111,7 @@ void ASPlayerController::Server_RequestCharacterSwap_Implementation(int32 NewInd
 
 		UE_LOG(LogTemp, Warning, TEXT("캐릭터 교체 완료! 현재 태그: %s"), *NewCharacterTag.ToString());
 	}
-}	
+}
 
 void ASPlayerController::BeginPlay()
 {
