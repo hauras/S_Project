@@ -27,6 +27,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	AActor* GetTarget() const { return Target; }
+	virtual void InitAbilityActorInfo() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character Data")
+	FGameplayTag CharacterTag;
+	
 protected:
 
 	UPROPERTY()
@@ -46,5 +51,4 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Inventory")
 	TObjectPtr<UInventoryComponent> Inventory;
 	
-	virtual void InitAbilityActorInfo() override;
 };

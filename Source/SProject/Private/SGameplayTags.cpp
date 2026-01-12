@@ -14,6 +14,7 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.2"), FString("InputTag_2"));
 	GameplayTags.InputTag_Interact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Interact"), FString("Interact"));
 	GameplayTags.InputTag_Inventory = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Inventory"), FString("Inventory"));
+	GameplayTags.InputTag_Tag = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Tag"), FString("Tag"));
 
 	
 	GameplayTags.Ability_Skill_BasicAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.BasicAttack"), FString("BasicAttack"));
@@ -45,5 +46,8 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Event_Montage_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Event.Montage.Summon"), FString("Montage_Summon"));
 
 	GameplayTags.State_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Stun"), FString("Stun"));
+
+	GameplayTags.Character_Warrior = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Character.Warrior"), FString("Warrior"));
+	GameplayTags.Character_Mage = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Character.Mage"), FString("Mage"));
 
 }

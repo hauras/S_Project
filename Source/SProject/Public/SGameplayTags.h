@@ -18,6 +18,7 @@ public:
 	FGameplayTag InputTag_2;
 	FGameplayTag InputTag_Interact;
 	FGameplayTag InputTag_Inventory;
+	FGameplayTag InputTag_Tag;
 	
 	FGameplayTag Vital_Health;
 	FGameplayTag Vital_Mana;
@@ -51,6 +52,9 @@ public:
 	FGameplayTag Event_Montage_Summon;
 	
 	FGameplayTag State_Stun;
+
+	FGameplayTag Character_Warrior;
+	FGameplayTag Character_Mage;
 private:
 	static FSGameplayTags GameplayTags;
 };

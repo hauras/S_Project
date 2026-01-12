@@ -31,6 +31,10 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestCharacterSwap(int32 NewIndex);
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

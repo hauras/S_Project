@@ -143,8 +143,12 @@ void APlayerCharacter::InitAbilityActorInfo()
 	SPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(SPlayerState, this);
 	AbilitySystemComponent = SPlayerState->GetAbilitySystemComponent();
 	AttributeSet = SPlayerState->GetAttributeSet();
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->AddLooseGameplayTag(CharacterTag);
+		UE_LOG(LogTemp, Warning, TEXT("캐릭터 '%s' 태그가 ASC에 등록되었습니다!"), *CharacterTag.ToString());
 
-
+	}
 	if (ASPlayerController* SPlayerController = Cast<ASPlayerController>(GetController()))
 	{
 		if (ASHUD* SHUD = Cast<ASHUD>(SPlayerController->GetHUD()))
