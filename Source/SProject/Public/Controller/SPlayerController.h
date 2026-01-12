@@ -7,6 +7,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "SPlayerController.generated.h"
 
+class UDamageTextComponent;
 class UInputAction;
 class USAbilitySystemComponent;
 class UInputMappingContext;
@@ -28,6 +29,8 @@ public:
 
 	void SetCrosshairVisibility(bool bVisible);
 
+	UFUNCTION(Client, Reliable)
+	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter);
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -72,4 +75,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UUserWidget> CrosshairWidgetClassInstance;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDamageTextComponent> DamageTextClass;
 };

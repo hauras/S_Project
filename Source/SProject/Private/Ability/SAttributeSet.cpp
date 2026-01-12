@@ -7,8 +7,10 @@
 #include "SGameplayTags.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/BossCharacter.h"
+#include "Controller/SPlayerController.h"
 #include "GameFramework/Character.h"
 #include "Interface/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 USAttributeSet::USAttributeSet()
 {
@@ -45,48 +47,38 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 {
 	Super::PostGameplayEffectExecute(Data);
 
-	// 1. 필요한 정보들(Source, Target 액터 및 컨트롤러 등)을 추출합니다.
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 
-	// 체력이 변했는지 여부를 추적할 플래그
 	bool bHealthChanged = false;
+	const float LocalIncomingDamage = GetIncomingDamage();
 
-	// [경로 A] 데미지 계산기(ExecCalc)를 통해 'IncomingDamage'가 들어온 경우
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
-		const float LocalIncomingDamage = GetIncomingDamage();
 		
-		// 주머니를 즉시 0으로 비웁니다. (다음 공격 계산을 위해 필수!)
 		SetIncomingDamage(0.f);
 
 		if (LocalIncomingDamage > 0.f)
 		{
-			// 현재 체력에서 데미지를 뺀 새로운 체력 계산
 			const float NewHealth = GetHealth() - LocalIncomingDamage;
 			
-			// 0~MaxHealth 사이로 안전하게 고정(Clamp)하여 적용
 			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
 			
-			bHealthChanged = true; // 체력이 변했음을 표시
+			bHealthChanged = true; 
 		}
 	}
 
-	// [경로 B] 포션 사용 등으로 'Health' 어트리뷰트가 직접 변한 경우
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		bHealthChanged = true;
 	}
 
-	// ---------------------------------------------------
-	// 2. 체력이 변했을 때만 실행되는 공통 부가 로직 (사망/피격/페이즈)
-	// ---------------------------------------------------
 	if (bHealthChanged)
 	{
 		const float CurrentHealth = GetHealth();
 		const float CurrentMaxHealth = GetMaxHealth();
 
-		// A. 사망 판정 (가장 최우선 순위)
+		// A. 사망 판정 
 		if (CurrentHealth <= 0.f)
 		{
 			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
@@ -129,6 +121,8 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 			TagContainer.AddTag(FSGameplayTags::Get().Ability_HitReact);
 			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 		}
+
+		ShowFloatingText(Props, LocalIncomingDamage);
 	}
 }
 void USAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
@@ -184,5 +178,16 @@ void USAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& D
 		Props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
 		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);
 		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Props.TargetAvatarActor);
+	}
+}
+
+void USAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage) const
+{
+	if (Props.SourceCharacter != Props.TargetCharacter)
+	{
+		if (ASPlayerController* PC = Cast<ASPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0)))
+		{
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter);
+		}
 	}
 }

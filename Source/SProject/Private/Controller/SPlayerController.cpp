@@ -6,9 +6,11 @@
 #include "SGameplayTags.h" // GameplayTag를 사용하기 위해
 #include "Ability/SAbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "MovieSceneTracksComponentTypes.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/PlayerCharacter.h"
 #include "UI/HUD/SHUD.h"
+#include "UI/Widget/DamageTextComponent.h"
 
 ASPlayerController::ASPlayerController()
 {
@@ -24,9 +26,20 @@ void ASPlayerController::SetCrosshairVisibility(bool bVisible)
 {
 	if (CrosshairWidgetClassInstance)
 	{
-		// true면 Visible, false면 Collapsed(숨김+공간차지X)
 		ESlateVisibility NewVisibility = bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
 		CrosshairWidgetClassInstance->SetVisibility(NewVisibility);
+	}
+}
+
+void ASPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter)
+{
+	if (IsValid(TargetCharacter) && DamageTextClass)
+	{
+		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetCharacter, DamageTextClass);
+		DamageText->RegisterComponent();
+		DamageText->AttachToComponent(TargetCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		DamageText->SetDamageText(DamageAmount);
 	}
 }
 
