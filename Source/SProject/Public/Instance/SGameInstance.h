@@ -54,7 +54,7 @@ public:
 	void FindRoom(); // 방 찾기
 
 	UPROPERTY()
-	FSPlayerData PlayerData;
+	TMap<FString, FSPlayerData> PlayerData;
 protected:
 
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);

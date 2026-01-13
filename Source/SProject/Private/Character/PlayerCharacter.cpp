@@ -41,18 +41,24 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	InitAbilityActorInfo(); 
 	AddCharacterAbilities();
 
-	// ★ 수정: 금고 유무와 상관없이 무조건 기본 스탯(100)을 먼저 채웁니다!
-	// 그래야 나중에 로드할 때 Clamp에 안 걸립니다.
+	// 1. 무조건 기본 스탯(100) 먼저 채우기
 	InitializeDefaultAttributes(); 
 
-	// 그 다음, 금고에 데이터가 있다면 덮어씌웁니다.
+	// 2. 금고에서 내 이름표가 붙은 데이터가 있는지 확인하고 로드하기
 	USGameInstance* GI = Cast<USGameInstance>(GetGameInstance());
-	if (GI && GI->PlayerData.bIsDataValid)
+	ASPlayerState* PS = GetPlayerState<ASPlayerState>();
+	
+	if (GI && PS)
 	{
-		LoadProgressFromGameInstance();
+		FString PlayerID = PS->GetPlayerName(); // 내 고유 이름(ID) 추출
+		
+		// 맵(TMap)에서 내 ID에 해당하는 데이터가 유효한지 확인
+		if (GI->PlayerData.Contains(PlayerID) && GI->PlayerData[PlayerID].bIsDataValid)
+		{
+			LoadProgressFromGameInstance();
+		}
 	}
 }
-
 void APlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
@@ -112,29 +118,31 @@ void APlayerCharacter::PerformInteractionTrace()
 
 void APlayerCharacter::LoadProgressFromGameInstance()
 {
+	if (!HasAuthority()) return; 
+
 	USGameInstance* GI = Cast<USGameInstance>(GetGameInstance());
-	if (GI && GI->PlayerData.bIsDataValid)
+	ASPlayerState* PS = GetPlayerState<ASPlayerState>();
+	USAttributeSet* AS = Cast<USAttributeSet>(AttributeSet);
+
+	if (GI && PS && AS && PS->Inventory)
 	{
-		ASPlayerState* PS = GetPlayerState<ASPlayerState>();
-		USAttributeSet* AS = Cast<USAttributeSet>(AttributeSet);
+		FString MyID = PS->GetPlayerName();
 
-		if (PS && PS->Inventory && AS)
+		if (GI->PlayerData.Contains(MyID))
 		{
-	
-			AS->SetMaxHealth(GI->PlayerData.MaxHealth);
-			AS->SetMaxMana(GI->PlayerData.MaxMana);
-			AS->SetAttackPower(GI->PlayerData.AttackPower);
-
-		
-			PS->Inventory->LoadInventoryData(GI->PlayerData.Inventory, GI->PlayerData.EquippedItems);
-
-
-			AS->SetHealth(GI->PlayerData.Health);
-			AS->SetMana(GI->PlayerData.Mana);
-
-			UE_LOG(LogTemp, Warning, TEXT("데이터 로드 완료! (중복 합산 방지 적용)"));
+			FSPlayerData& MyData = GI->PlayerData[MyID];
+			if (MyData.bIsDataValid)
+			{
+				// 서버가 직접 데이터를 복구합니다.
+				AS->SetMaxHealth(MyData.MaxHealth);
+				// ... (기존 로드 로직 동일) ...
+				PS->Inventory->LoadInventoryData(MyData.Inventory, MyData.EquippedItems);
+				AS->SetHealth(MyData.Health);
+				
+				// [중요] 서버가 값을 바꿨으니, 리플리케이션을 통해 클라이언트에게 전달됩니다.
+				GI->PlayerData.Remove(MyID);
+			}
 		}
-		GI->PlayerData.bIsDataValid = false;
 	}
 }
 void APlayerCharacter::InitAbilityActorInfo()

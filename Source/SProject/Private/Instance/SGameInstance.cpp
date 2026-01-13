@@ -58,7 +58,6 @@ void USGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccess
 {
     if (bWasSuccessful)
     {
-        UE_LOG(LogTemp, Warning, TEXT("방 만들기 성공! 지도로 이동합니다."));
 
         UGameplayStatics::OpenLevel(GetWorld(), FName("DevMap"), true, "listen");
     }

@@ -10,14 +10,16 @@ void UInventoryWidgetController::BroadcastInitialValues()
 	ASPlayerState* PS = PlayerController->GetPlayerState<ASPlayerState>();
 	if (PS && PS->Inventory)
 	{
-		UInventoryComponent* Inventory = PS->Inventory;
-		if (Inventory)
+		// 1. 가방 리스트 방송 (기존과 동일)
+		InventoryItemsChangedDelegate.Broadcast(PS->Inventory->GetInventoryList()); 
+
+		// 2. [수정] 장착 아이템 방송
+		// 이제 TMap이 아니라 TArray를 순회하며 하나씩 쏴줍니다.
+		// (InventoryComponent에 'EquippedItemsArray'가 public이거나 Getter가 있어야 합니다)
+		for (const FEquippedItemInfo& Info : PS->Inventory->GetEquippedItemsArray())
 		{
-			InventoryItemsChangedDelegate.Broadcast(Inventory->GetInventoryList()); 
-			for (auto& Pair : Inventory->EquippedItems)
-			{
-				EquipmentChangedDelegate.Broadcast(Pair.Key, Pair.Value);
-			}
+			// 구조체 안에 들어있는 Slot(부위)과 ItemData(아이콘)를 분리해서 방송!
+			EquipmentChangedDelegate.Broadcast(Info.Slot, Info.ItemData);
 		}
 	}
 }
