@@ -59,7 +59,7 @@ void UGA_ProjectileBase::SpawnProjectile(FGameplayEventData Payload)
     ICombatInterface* CombatInterface = Cast<ICombatInterface>(AvatarPawn);
     if (!CombatInterface || !ProjectileClass) return;
 
-    const FVector SpawnLocation = CombatInterface->GetSocketLocation(FSGameplayTags::Get().Combat_Socket_Weapon);
+    const FVector SpawnLocation = CombatInterface->GetSocketLocation(ProjectileTag);
     
     FRotator LookRotation = FRotator::ZeroRotator;
     AController* OwnerController = AvatarPawn->GetController();

@@ -54,16 +54,13 @@ void ABossCharacter::PlayHitReactEffect()
 
 void ABossCharacter::Die()
 {
-	// 부모의 Die를 호출하여 기본 죽음 처리 수행
 	Super::Die();
 
-	// 보스는 디졸브 연출 완료 후 직접 Destroy 할 것이므로 자동 삭제(LifeSpan) 방지
 	SetLifeSpan(0.0f); 
 }
 
 void ABossCharacter::MulticastHandleDeath_Implementation()
 {
-	// 1. 죽음 몽타주 재생 (부모 클래스 로직 실행)
 	Super::MulticastHandleDeath_Implementation();
 
 	const float DeathAnimDuration = 3.1f; 

@@ -36,6 +36,51 @@ AEnemyCharacter::AEnemyCharacter()
 	HealthBar->SetupAttachment(GetRootComponent());
 }
 
+void AEnemyCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	InitAbilityActorInfo();
+	
+	if (HasAuthority())
+	{
+		USAbilityFunctionLibrary::GiveStartupAbilities(this, AbilitySystemComponent, EnemyType);
+	}
+	if (USUserWidgetBase* SUserWidget = Cast<USUserWidgetBase>(HealthBar->GetUserWidgetObject()))
+	{
+		SUserWidget->SetWidgetController(this);
+	}
+
+	if (const USAttributeSet* EnemyAS = Cast<USAttributeSet>(AttributeSet))
+	{
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(EnemyAS->GetHealthAttribute()).AddLambda(
+			[this](const FOnAttributeChangeData& Data)
+			{
+				OnHealthChanged.Broadcast(Data.NewValue);
+			}
+		);	
+
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(EnemyAS->GetMaxHealthAttribute()).AddLambda(
+			[this](const FOnAttributeChangeData& Data)
+			{
+				OnMaxHealthChanged.Broadcast(Data.NewValue);
+			}
+		);
+		
+		AbilitySystemComponent->RegisterGameplayTagEvent(FSGameplayTags::Get().Ability_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(
+			this,
+			&AEnemyCharacter::HitReactTagChanged
+		);
+
+		AbilitySystemComponent->RegisterGameplayTagEvent(FSGameplayTags::Get().State_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(
+			this,
+			&AEnemyCharacter::StunTagChanged
+		);	
+		OnHealthChanged.Broadcast(EnemyAS->GetHealth());
+		OnMaxHealthChanged.Broadcast(EnemyAS->GetMaxHealth());
+	}
+}
+
 void AEnemyCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -81,46 +126,24 @@ void AEnemyCharacter::HitReactTagChanged(const FGameplayTag CallbackTag, int32 N
 	}
 }
 
-void AEnemyCharacter::BeginPlay()
+void AEnemyCharacter::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
-	Super::BeginPlay();
-	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
-	InitAbilityActorInfo();
+	FString DebugMsg = FString::Printf(TEXT("적 스턴 상태: %s (태그 개수: %d)"), (NewCount > 0 ? TEXT("YES") : TEXT("NO")), NewCount);
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Cyan, DebugMsg);
 	
-	if (HasAuthority())
-	{
-		USAbilityFunctionLibrary::GiveStartupAbilities(this, AbilitySystemComponent, EnemyType);
-	}
-	if (USUserWidgetBase* SUserWidget = Cast<USUserWidgetBase>(HealthBar->GetUserWidgetObject()))
-	{
-		SUserWidget->SetWidgetController(this);
-	}
+	bool bIsStunned = NewCount > 0;
 
-	if (const USAttributeSet* EnemyAS = Cast<USAttributeSet>(AttributeSet))
-	{
-		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(EnemyAS->GetHealthAttribute()).AddLambda(
-			[this](const FOnAttributeChangeData& Data)
-			{
-				OnHealthChanged.Broadcast(Data.NewValue);
-			}
-		);	
+	// 1. 물리적으로 멈추기 (선택 사항)
+	if (bIsStunned) GetCharacterMovement()->MaxWalkSpeed = 0.f;
+	else GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 
-		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(EnemyAS->GetMaxHealthAttribute()).AddLambda(
-			[this](const FOnAttributeChangeData& Data)
-			{
-				OnMaxHealthChanged.Broadcast(Data.NewValue);
-			}
-		);
-		
-		AbilitySystemComponent->RegisterGameplayTagEvent(FSGameplayTags::Get().Ability_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(
-			this,
-			&AEnemyCharacter::HitReactTagChanged
-		);
-		
-		OnHealthChanged.Broadcast(EnemyAS->GetHealth());
-		OnMaxHealthChanged.Broadcast(EnemyAS->GetMaxHealth());
+	// 2. [핵심 ⭐] 블랙보드에 "나 기절했어!"라고 알리기
+	if (SAIController && SAIController->GetBlackboardComponent())
+	{
+		SAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsStunned"), bIsStunned);
 	}
 }
+
 
 void AEnemyCharacter::InitAbilityActorInfo()
 {

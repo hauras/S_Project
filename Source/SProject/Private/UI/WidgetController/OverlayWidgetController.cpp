@@ -5,6 +5,8 @@
 #include "Ability/SAbilitySystemComponent.h"
 #include "Ability/SAttributeSet.h"
 #include "Data/AbilityInfo.h"
+#include "Data/PlayerDataAsset.h"
+#include "State/SPlayerState.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
@@ -81,13 +83,31 @@ void UOverlayWidgetController::OnInitializeStartupAbilities(USAbilitySystemCompo
 {
 	if (!SAbilitySystemComponent->bStartupAbilitiesGiven) return;
 
+	// 1. 현재 플레이어의 영혼(PlayerState)을 가져옵니다.
+	ASPlayerState* PS = Cast<ASPlayerState>(PlayerState);
+	if (!PS) return;
+
+	// 2. [핵심 ⭐] 현재 조종 중인 캐릭터의 '데이터 에셋'에서 '전용 스킬 사전'을 꺼냅니다.
+	// PS에 있는 인덱스를 통해 현재 캐릭터가 누구인지 찾습니다.
+	if (!PS->PlayerData.IsValidIndex(PS->CurrentCharacterIndex)) return;
+	
+	UPlayerDataAsset* CurrentData = PS->PlayerData[PS->CurrentCharacterIndex];
+	if (!CurrentData || !CurrentData->CharacterInfo.AbilityInfo) return;
+
+	// 이 캐릭터만을 위한 스킬 UI 정보 사전입니다.
+	UAbilityInfo* CurrentHeroAbilityInfo = CurrentData->CharacterInfo.AbilityInfo;
+
 	FForEachAbility BroadcastDelegate;
-	BroadcastDelegate.BindLambda([this, SAbilitySystemComponent](const FGameplayAbilitySpec& AbilitySpec)
+	// 3. 람다 함수 캡처 리스트에 'CurrentHeroAbilityInfo'를 추가하여 
+	// 루프 안에서 이 사전을 사용하도록 합니다.
+	BroadcastDelegate.BindLambda([this, SAbilitySystemComponent, CurrentHeroAbilityInfo](const FGameplayAbilitySpec& AbilitySpec)
 	{
+		// [수정된 부분] 고정된 'AbilityInfo' 대신 '현재 영웅의 사전'에서 정보를 찾습니다.
+		FSAbilityInfo Info = CurrentHeroAbilityInfo->FindAbilityInfoForTag(SAbilitySystemComponent->GetAbilityTagFromSpec(AbilitySpec));
 		
-		FSAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(SAbilitySystemComponent->GetAbilityTagFromSpec(AbilitySpec));
 		Info.InputTag = SAbilitySystemComponent->GetInputTagFromSpec(AbilitySpec);
 		AbilityInfoDelegate.Broadcast(Info);
 	});
+	
 	SAbilitySystemComponent->ForEachAbility(BroadcastDelegate);
 }

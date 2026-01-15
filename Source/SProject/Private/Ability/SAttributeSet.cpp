@@ -85,13 +85,12 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 			{
 				CombatInterface->Die();
 			}
-			return; // 사망 시 아래 로직(피격 애니메이션 등)은 무시하고 종료
+			return; 
 		}
 
-		// B. 타겟이 '보스'인 경우의 특별 처리
+		// B. 보스
 		if (ABossCharacter* Boss = Cast<ABossCharacter>(Props.TargetAvatarActor))
 		{
-			// 1) 보스 전용 피격 번쩍임 효과 재생
 			Boss->PlayHitReactEffect();
 
 			// 2) 소환 페이즈 체크 (체력 50% 이하 & 아직 소환 전)
@@ -102,7 +101,6 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 				{
 					Boss->bHasSummoned = true;
 					
-					// AI 컨트롤러를 찾아 블랙보드 값을 바꿉니다.
 					if (AAIController* AIC = Cast<AAIController>(Boss->GetController()))
 					{
 						if (UBlackboardComponent* BB = AIC->GetBlackboardComponent())
@@ -116,38 +114,19 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 		// C. 타겟이 일반 몬스터나 플레이어인 경우
 		else
 		{
-			// 기존 애니메이션 기반 HitReact 어빌리티 발동
-			FGameplayTagContainer TagContainer;
-			TagContainer.AddTag(FSGameplayTags::Get().Ability_HitReact);
-			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			bool bIsStunned = Props.TargetASC->HasMatchingGameplayTag(FSGameplayTags::Get().State_Stun);
+
+			// 2. 기절 상태가 아닐 때
+			if (!bIsStunned)
+			{
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FSGameplayTags::Get().Ability_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			}
 		}
 
 		ShowFloatingText(Props, LocalIncomingDamage);
 	}
-}
-void USAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, Health, OldHealth);
-}
-
-void USAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, MaxHealth, OldMaxHealth);
-}
-
-void USAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, Mana, OldMana);
-}
-
-void USAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, MaxMana, OldMaxMana);
-}
-
-void USAttributeSet::OnRep_AttackPower(const FGameplayAttributeData& OldAttackPower) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, AttackPower, OldAttackPower);
 }
 
 void USAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
@@ -191,3 +170,29 @@ void USAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Dama
 		}
 	}
 }
+
+void USAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, Health, OldHealth);
+}
+
+void USAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, MaxHealth, OldMaxHealth);
+}
+
+void USAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, Mana, OldMana);
+}
+
+void USAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, MaxMana, OldMaxMana);
+}
+
+void USAttributeSet::OnRep_AttackPower(const FGameplayAttributeData& OldAttackPower) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, AttackPower, OldAttackPower);
+}
+

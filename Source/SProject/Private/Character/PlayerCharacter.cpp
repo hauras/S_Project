@@ -41,21 +41,24 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	InitAbilityActorInfo(); 
 	AddCharacterAbilities();
 
-	// 1. 무조건 기본 스탯(100) 먼저 채우기
-	InitializeDefaultAttributes(); 
-
-	// 2. 금고에서 내 이름표가 붙은 데이터가 있는지 확인하고 로드하기
 	USGameInstance* GI = Cast<USGameInstance>(GetGameInstance());
 	ASPlayerState* PS = GetPlayerState<ASPlayerState>();
 	
 	if (GI && PS)
 	{
-		FString PlayerID = PS->GetPlayerName(); // 내 고유 이름(ID) 추출
+		FString PlayerID = PS->GetPlayerName();
 		
-		// 맵(TMap)에서 내 ID에 해당하는 데이터가 유효한지 확인
+		// ★ 핵심 1: 금고에 내 데이터가 "진짜" 있을 때만 로드를 실행합니다.
 		if (GI->PlayerData.Contains(PlayerID) && GI->PlayerData[PlayerID].bIsDataValid)
 		{
+			// 짐 풀기 (여기서 장비도 입히고 현재 피도 맞춥니다)
 			LoadProgressFromGameInstance();
+		}
+		else
+		{
+			// ★ 핵심 2: 금고가 비어있을 때만(게임 첫 시작 등) 기본 초기화를 합니다.
+			// 이렇게 하면 중복으로 스탯이 더해지는 것을 원천 차단할 수 있습니다.
+			InitializeDefaultAttributes();
 		}
 	}
 }
@@ -155,7 +158,6 @@ void APlayerCharacter::InitAbilityActorInfo()
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->AddLooseGameplayTag(CharacterTag);
-		UE_LOG(LogTemp, Warning, TEXT("캐릭터 '%s' 태그가 ASC에 등록되었습니다!"), *CharacterTag.ToString());
 
 	}
 	if (ASPlayerController* SPlayerController = Cast<ASPlayerController>(GetController()))

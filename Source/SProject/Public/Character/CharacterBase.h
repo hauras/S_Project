@@ -38,6 +38,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetSocketLocation(const FGameplayTag& SocketTag) const override;
+
+	void AddCharacterAbilities();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -47,7 +50,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
 
-	void AddCharacterAbilities();
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
 	TSubclassOf<UGameplayEffect> VitalAttributes;

@@ -16,9 +16,10 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Inventory = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Inventory"), FString("Inventory"));
 	GameplayTags.InputTag_Tag = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Tag"), FString("Tag"));
 
-	
-	GameplayTags.Ability_Skill_BasicAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.BasicAttack"), FString("BasicAttack"));
 	GameplayTags.Ability_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.HitReact"), FString("HitReact"));
+
+	// 전사 스킬
+	GameplayTags.Ability_Skill_BasicAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.BasicAttack"), FString("BasicAttack"));
 	
 	GameplayTags.Ability_Skill_Dodge = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.Dodge"), FString("Dodge"));
 	GameplayTags.Cooldown_Dodge = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Dodge"), FString("Cooldown_Dodge"));
@@ -29,6 +30,12 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Ability_Skill_IceProjectile = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.IceProjectile"), FString("IceProjectile"));
 	GameplayTags.Cooldown_IceProjectile = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.IceProjectile"), FString("Cooldown_IceProjectile"));
 
+	// 마법사 스킬
+	GameplayTags.Ability_Skill_MageAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.MageAttack"), FString("MageAttack"));
+	GameplayTags.Ability_Skill_Flare = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.Flare"), FString("Flare"));
+	GameplayTags.Cooldown_Flare = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Flare"), FString("Cooldown_Flare"));
+
+	// 공격 부위
 	GameplayTags.Combat_Socket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Weapon"), FString("Combat_Socket_Weapon"));
 	GameplayTags.Combat_Socket_Fist_Right = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Fist.Right"), FString("Combat_Socket_Fist_Right"));
 	GameplayTags.Combat_Socket_Fist_Left = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Fist.Left"), FString("Combat_Socket_Fist_Left"));

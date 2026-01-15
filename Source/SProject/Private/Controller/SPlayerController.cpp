@@ -49,84 +49,49 @@ void ASPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACh
 
 void ASPlayerController::Server_RequestCharacterSwap_Implementation(int32 NewIndex)
 {
+	// 1. 유효성 체크
 	ASPlayerState* PS = GetPlayerState<ASPlayerState>();
-	// 1. 안전장치: 데이터 유효성 확인
-	if (!PS || !PS->PlayerData.IsValidIndex(NewIndex) || !PS->PlayerData[NewIndex]) return;
-
 	APlayerCharacter* OldCharacter = Cast<APlayerCharacter>(GetPawn());
-	if (!OldCharacter) return;
+	if (!PS || !OldCharacter || !PS->PlayerData.IsValidIndex(NewIndex)) return;
 
-	// 위치/속도/회전 백업
+	// 2. [필수] 기존 스킬/태그만 정리 (ASC는 PS에 있으니 유지됨)
+	UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
+	if (ASC)
+	{
+		ASC->RemoveLooseGameplayTag(OldCharacter->CharacterTag);
+		ASC->ClearAllAbilities(); 
+	}
+
+	// 3. 위치/속도 백업
 	FTransform SpawnTransform = OldCharacter->GetActorTransform();
 	FVector OldVelocity = OldCharacter->GetVelocity();
 
-	// 짐 싸기 로직 (TMap 자료구조 대응)
-	if (USGameInstance* GI = Cast<USGameInstance>(GetGameInstance()))
-	{
-		const USAttributeSet* AS = Cast<USAttributeSet>(OldCharacter->GetAttributeSet());
-		UAbilitySystemComponent* ASC = OldCharacter->GetAbilitySystemComponent();
+	// 4. [수정] GameInstance 저장 로직을 과감히 삭제해도 됩니다! ⭐
+	// 왜? PS에 데이터가 이미 남아있으니까요.
 
-		if (AS && ASC && PS->Inventory)
-		{
-			// 2. [핵심 ⭐] 나만의 "개인용 보따리" 생성
-			FSPlayerData MyData;
-
-			// 가방 리스트 복사
-			MyData.Inventory = PS->Inventory->GetInventoryList();
-
-			// ★ [수정] 장착 아이템 변환 (Array -> Map)
-			// 컴포넌트의 복제용 배열을 순회하며 금고의 TMap에 하나씩 채워넣습니다.
-			for (const FEquippedItemInfo& EquipInfo : PS->Inventory->GetEquippedItemsArray())
-			{
-				MyData.EquippedItems.Add(EquipInfo.Slot, EquipInfo.ItemData);
-			}
-
-			// 스탯 기본값 저장 (중복 합산 방지 알고리즘)
-			MyData.MaxHealth = ASC->GetNumericAttributeBase(AS->GetMaxHealthAttribute());
-			MyData.MaxMana = ASC->GetNumericAttributeBase(AS->GetMaxManaAttribute());
-			MyData.AttackPower = ASC->GetNumericAttributeBase(AS->GetAttackPowerAttribute());
-
-			// 실시간 수치 저장
-			MyData.Health = AS->GetHealth();
-			MyData.Mana = AS->GetMana();
-			MyData.bIsDataValid = true;
-
-			// 3. [핵심 ⭐] PlayerDataMap에 내 이름표로 저장
-			FString PlayerID = PS->GetPlayerName();
-			GI->PlayerData.Add(PlayerID, MyData);
-		}
-	}
-	
-	// --- 아래 소환 및 빙의 로직은 동일합니다 ---
-	
+	// 5. 교체 진행
 	UnPossess();
 	OldCharacter->Destroy();
-	
-	UClass* NewCharacterClass = PS->PlayerData[NewIndex]->CharacterInfo.CharacterClass;
-	FGameplayTag NewCharacterTag = PS->PlayerData[NewIndex]->CharacterInfo.CharacterTag;
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
+	UClass* NewClass = PS->PlayerData[NewIndex]->CharacterInfo.CharacterClass;
+	APlayerCharacter* NewCharacter = GetWorld()->SpawnActor<APlayerCharacter>(NewClass, SpawnTransform);
 
-	APlayerCharacter* NewCharacter = GetWorld()->SpawnActor<APlayerCharacter>(NewCharacterClass, SpawnTransform, SpawnParams);
-	
 	if (NewCharacter)
 	{
-		NewCharacter->CharacterTag = NewCharacterTag;
-		PS->CurrentCharacterTag = NewCharacterTag;
+		NewCharacter->CharacterTag = PS->PlayerData[NewIndex]->CharacterInfo.CharacterTag;
 		PS->CurrentCharacterIndex = NewIndex;
+		PS->CurrentCharacterTag = NewCharacter->CharacterTag;
 
 		Possess(NewCharacter);
 
-		// [중요] 새로 소환된 몸이 GI에서 방금 저장한 내 짐을 다시 풉니다.
+		// ★ 중요: 여기서는 Load...가 아니라 단순히 '연결'만 합니다.
 		NewCharacter->InitAbilityActorInfo();
+		NewCharacter->AddCharacterAbilities(); 
 
 		if (NewCharacter->GetCharacterMovement())
 		{
 			NewCharacter->GetCharacterMovement()->Velocity = OldVelocity;
 		}
-
-		UE_LOG(LogTemp, Warning, TEXT("[%s] 캐릭터 교체 및 데이터 보존 완료!"), *PS->GetPlayerName());
 	}
 }
 

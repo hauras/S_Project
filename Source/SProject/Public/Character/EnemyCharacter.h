@@ -31,6 +31,8 @@ public:
 
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
+	void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	bool bHitReacting = false;
 

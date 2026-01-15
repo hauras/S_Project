@@ -35,6 +35,12 @@ public:
 	FGameplayTag Ability_Skill_IceProjectile;
 	FGameplayTag Cooldown_IceProjectile;
 
+	FGameplayTag Ability_Skill_MageAttack;
+
+	FGameplayTag Ability_Skill_Flare;
+	FGameplayTag Cooldown_Flare;
+
+	
 	FGameplayTag Combat_Socket_Weapon;
 	FGameplayTag Combat_Socket_Fist_Right;
 	FGameplayTag Combat_Socket_Fist_Left;
