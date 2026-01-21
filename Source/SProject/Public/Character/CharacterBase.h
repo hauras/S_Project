@@ -39,6 +39,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetSocketLocation(const FGameplayTag& SocketTag) const override;
 
+
+	UFUNCTION(BlueprintCallable)
+	virtual FName GetCombatSocketNameFromTag(const FGameplayTag& SocketTag) const override;
+
 	void AddCharacterAbilities();
 
 protected:

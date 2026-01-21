@@ -71,8 +71,11 @@ void UAoeStunBase::OnFlareEventReceived(FGameplayEventData Payload)
 		OutActors
 	);
 
-	UE_LOG(LogTemp, Warning, TEXT("주변에서 감지된 액터 수: %d"), OutActors.Num());
-		
+	if (FlareParticle) 
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FlareParticle, ActorLoc, FRotator::ZeroRotator, FVector(FlareRadius / 100.f));
+	}
+	
 	FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
 	ContextHandle.AddSourceObject(this);
 

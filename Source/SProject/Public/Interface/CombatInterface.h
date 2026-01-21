@@ -34,6 +34,7 @@ public:
 	virtual AActor* GetAvatar() = 0;
 	
 	virtual FVector GetSocketLocation(const FGameplayTag& SocketTag) const = 0;
+	virtual FName GetCombatSocketNameFromTag(const FGameplayTag& SocketTag) const = 0;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsBoss() const;

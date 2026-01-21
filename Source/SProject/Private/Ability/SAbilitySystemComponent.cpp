@@ -18,11 +18,11 @@ void USAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UG
 {
 	for (TSubclassOf<UGameplayAbility> Ability : StartupAbilities)
 	{
-		
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Ability, 1);
 		if (const USGameplayAbility* SAbility = Cast<USGameplayAbility>(AbilitySpec.Ability))
 		{
 			AbilitySpec.DynamicAbilityTags.AddTag(SAbility->InputTag);
+
 			GiveAbility(AbilitySpec);
 		}
 	}
@@ -35,33 +35,34 @@ void USAbilitySystemComponent::OnRep_StartupAbilitiesGiven()
 	AbilityGivenDelegate.Broadcast(this);
 }
 
-void USAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
+void USAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
 {
-	if (!InputTag.IsValid()) return;
-	
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
 		{
 			AbilitySpecInputPressed(AbilitySpec);
+
 			if (!AbilitySpec.IsActive())
 			{
-				TryActivateAbility(AbilitySpec.Handle);
+				if (TryActivateAbility(AbilitySpec.Handle))
+				{
+					return; 
+				}
 			}
 		}
 	}
 }
 
-void USAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
+void USAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
-	
+    
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
 		{
-
+			// [수정] Held에서는 "누르고 있음" 상태만 업데이트 (재실행X)
 			AbilitySpecInputPressed(AbilitySpec);
 		}
 	}
@@ -70,13 +71,19 @@ void USAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputT
 void USAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
-	
+    
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag) && AbilitySpec.IsActive())
+		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
 		{
+			// 1. 입력이 해제되었음을 시스템에 알림 (내부 상태 업데이트)
 			AbilitySpecInputReleased(AbilitySpec);
-			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, AbilitySpec.ActivationInfo.GetActivationPredictionKey());
+
+			// 2. 만약 활성화된 스킬이라면, '입력 해제 이벤트'를 복제하여 서버/태스크에 전달
+			if (AbilitySpec.IsActive())
+			{
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, AbilitySpec.GetAbilityInstances().Last()->GetCurrentActivationInfoRef().GetActivationPredictionKey());
+			}
 		}
 	}
 }

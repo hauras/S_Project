@@ -40,6 +40,8 @@ public:
 	FGameplayTag Ability_Skill_Flare;
 	FGameplayTag Cooldown_Flare;
 
+	FGameplayTag Ability_Skill_Beam;
+	FGameplayTag Cooldown_Beam;
 	
 	FGameplayTag Combat_Socket_Weapon;
 	FGameplayTag Combat_Socket_Fist_Right;

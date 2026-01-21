@@ -48,16 +48,13 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	{
 		FString PlayerID = PS->GetPlayerName();
 		
-		// ★ 핵심 1: 금고에 내 데이터가 "진짜" 있을 때만 로드를 실행합니다.
 		if (GI->PlayerData.Contains(PlayerID) && GI->PlayerData[PlayerID].bIsDataValid)
 		{
-			// 짐 풀기 (여기서 장비도 입히고 현재 피도 맞춥니다)
 			LoadProgressFromGameInstance();
 		}
 		else
 		{
-			// ★ 핵심 2: 금고가 비어있을 때만(게임 첫 시작 등) 기본 초기화를 합니다.
-			// 이렇게 하면 중복으로 스탯이 더해지는 것을 원천 차단할 수 있습니다.
+	
 			InitializeDefaultAttributes();
 		}
 	}
@@ -136,13 +133,10 @@ void APlayerCharacter::LoadProgressFromGameInstance()
 			FSPlayerData& MyData = GI->PlayerData[MyID];
 			if (MyData.bIsDataValid)
 			{
-				// 서버가 직접 데이터를 복구합니다.
 				AS->SetMaxHealth(MyData.MaxHealth);
-				// ... (기존 로드 로직 동일) ...
 				PS->Inventory->LoadInventoryData(MyData.Inventory, MyData.EquippedItems);
 				AS->SetHealth(MyData.Health);
 				
-				// [중요] 서버가 값을 바꿨으니, 리플리케이션을 통해 클라이언트에게 전달됩니다.
 				GI->PlayerData.Remove(MyID);
 			}
 		}

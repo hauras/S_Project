@@ -32,8 +32,12 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 
 	// 마법사 스킬
 	GameplayTags.Ability_Skill_MageAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.MageAttack"), FString("MageAttack"));
+
 	GameplayTags.Ability_Skill_Flare = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.Flare"), FString("Flare"));
 	GameplayTags.Cooldown_Flare = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Flare"), FString("Cooldown_Flare"));
+
+	GameplayTags.Ability_Skill_Beam = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.Beam"), FString("Beam"));
+	GameplayTags.Cooldown_Beam = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Beam"), FString("Cooldown_Beam"));
 
 	// 공격 부위
 	GameplayTags.Combat_Socket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Weapon"), FString("Combat_Socket_Weapon"));

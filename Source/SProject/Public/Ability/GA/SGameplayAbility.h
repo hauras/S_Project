@@ -5,6 +5,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "SGameplayAbility.generated.h"
 
+
 /**
  * 
  */
@@ -22,5 +23,5 @@ public:
 protected:
 	TArray<FHitResult> GetHitResultFromTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, bool bDrawDebug = false, bool bIgnoreSelf = true) const;
 
-
+	
 };

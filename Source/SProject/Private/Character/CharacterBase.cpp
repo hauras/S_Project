@@ -37,19 +37,22 @@ AActor* ACharacterBase::GetAvatar()
 
 FVector ACharacterBase::GetSocketLocation(const FGameplayTag& SocketTag) const
 {
-	if (SocketTag.MatchesTagExact(FSGameplayTags::Get().Combat_Socket_Weapon))
+	FName SocketName = GetCombatSocketNameFromTag(SocketTag); // 위에서 만든 함수 호출
+	if (SocketName != NAME_None)
 	{
-		return GetMesh()->GetSocketLocation(FName("WeaponEndSocket"));
-	}
-	if (SocketTag.MatchesTagExact(FSGameplayTags::Get().Combat_Socket_Fist_Right))
-	{
-		return GetMesh()->GetSocketLocation(FName("Fist_R_Socket"));
-	}
-	if (SocketTag.MatchesTagExact(FSGameplayTags::Get().Combat_Socket_Fist_Left))
-	{
-		return GetMesh()->GetSocketLocation(FName("Fist_L_Socket"));
+		return GetMesh()->GetSocketLocation(SocketName);
 	}
 	return GetActorLocation();
+}
+
+FName ACharacterBase::GetCombatSocketNameFromTag(const FGameplayTag& SocketTag) const
+{
+	const FSGameplayTags& GameplayTags  = FSGameplayTags::Get();
+	if (SocketTag.MatchesTagExact(GameplayTags.Combat_Socket_Weapon)) return FName("WeaponEndSocket");
+	if (SocketTag.MatchesTagExact(GameplayTags.Combat_Socket_Fist_Right)) return FName("Fist_R_Socket");
+	if (SocketTag.MatchesTagExact(GameplayTags.Combat_Socket_Fist_Left)) return FName("Fist_L_Socket");
+
+	return NAME_None;
 }
 
 void ACharacterBase::BeginPlay()

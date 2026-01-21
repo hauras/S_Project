@@ -49,12 +49,10 @@ void ASPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACh
 
 void ASPlayerController::Server_RequestCharacterSwap_Implementation(int32 NewIndex)
 {
-	// 1. 유효성 체크
 	ASPlayerState* PS = GetPlayerState<ASPlayerState>();
 	APlayerCharacter* OldCharacter = Cast<APlayerCharacter>(GetPawn());
 	if (!PS || !OldCharacter || !PS->PlayerData.IsValidIndex(NewIndex)) return;
 
-	// 2. [필수] 기존 스킬/태그만 정리 (ASC는 PS에 있으니 유지됨)
 	UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
 	if (ASC)
 	{
@@ -65,10 +63,7 @@ void ASPlayerController::Server_RequestCharacterSwap_Implementation(int32 NewInd
 	// 3. 위치/속도 백업
 	FTransform SpawnTransform = OldCharacter->GetActorTransform();
 	FVector OldVelocity = OldCharacter->GetVelocity();
-
-	// 4. [수정] GameInstance 저장 로직을 과감히 삭제해도 됩니다! ⭐
-	// 왜? PS에 데이터가 이미 남아있으니까요.
-
+	
 	// 5. 교체 진행
 	UnPossess();
 	OldCharacter->Destroy();
@@ -84,9 +79,6 @@ void ASPlayerController::Server_RequestCharacterSwap_Implementation(int32 NewInd
 
 		Possess(NewCharacter);
 
-		// ★ 중요: 여기서는 Load...가 아니라 단순히 '연결'만 합니다.
-		NewCharacter->InitAbilityActorInfo();
-		NewCharacter->AddCharacterAbilities(); 
 
 		if (NewCharacter->GetCharacterMovement())
 		{
@@ -212,13 +204,11 @@ void ASPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		ASPlayerState* PS = GetPlayerState<ASPlayerState>();
 		if (PS && PS->PlayerData.Num() > 1)
 		{
-			// 현재 0번이면 1번으로, 1번이면 0번으로 바꾸는 수학적 공식
 			int32 NextIndex = (PS->CurrentCharacterIndex + 1) % PS->PlayerData.Num();
 			
-			// 서버에 교체 요청!
 			Server_RequestCharacterSwap(NextIndex);
 		}
-		return; // 교체 시에는 스킬 로직을 타지 않게 막습니다.
+		return; 
 	}
 	
 	if (GetASC() == nullptr) return;
