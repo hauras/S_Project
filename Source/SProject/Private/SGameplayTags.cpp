@@ -39,6 +39,9 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Ability_Skill_Beam = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.Beam"), FString("Beam"));
 	GameplayTags.Cooldown_Beam = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Beam"), FString("Cooldown_Beam"));
 
+	GameplayTags.Ability_Skill_Teleport = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.Teleport"), FString("Teleport"));
+	GameplayTags.Cooldown_Teleport = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Teleport"), FString("Cooldown_Teleport"));
+
 	// 공격 부위
 	GameplayTags.Combat_Socket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Weapon"), FString("Combat_Socket_Weapon"));
 	GameplayTags.Combat_Socket_Fist_Right = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Fist.Right"), FString("Combat_Socket_Fist_Right"));

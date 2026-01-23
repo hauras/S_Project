@@ -42,6 +42,9 @@ public:
 
 	FGameplayTag Ability_Skill_Beam;
 	FGameplayTag Cooldown_Beam;
+
+	FGameplayTag Ability_Skill_Teleport;
+	FGameplayTag Cooldown_Teleport;
 	
 	FGameplayTag Combat_Socket_Weapon;
 	FGameplayTag Combat_Socket_Fist_Right;

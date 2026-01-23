@@ -74,7 +74,6 @@ FVector ABeamBase::GetBeamEndLocation() const
 	FVector ViewLocation; FRotator ViewRotation;
 	Pawn->GetController()->GetPlayerViewPoint(ViewLocation, ViewRotation);
 
-	// --- [GA와 동일하게 각도 제한] ---
 	FRotator FixedRotation = ViewRotation;
 	FixedRotation.Pitch = FMath::ClampAngle(FixedRotation.Pitch, -45.0f, 10.0f);
 	// -------------------------------
@@ -92,7 +91,7 @@ FVector ABeamBase::GetBeamEndLocation() const
 	}
 
 	return TraceEnd;
-}
+} 
 bool ABeamBase::OnRemove_Implementation(AActor* MyTarget, const FGameplayCueParameters& Parameters)
 {
 	if (BeamPSC) BeamPSC->Deactivate();
