@@ -97,7 +97,6 @@ void UAoeStunBase::OnFlareEventReceived(FGameplayEventData Payload)
 					}
 				}
 
-				// 2. [기절 시간 계산] 질문자님의 알고리즘 유지
 				float Distance = Target->GetDistanceTo(AvatarActor);
 				float MaxDuration = 3.0f; 
 				float MinDuration = 0.2f; 
@@ -106,13 +105,11 @@ void UAoeStunBase::OnFlareEventReceived(FGameplayEventData Payload)
 				float ExponentialAlpha = Alpha * Alpha; // 지수 감쇄 적용
 				float StunDuration = FMath::Lerp(MaxDuration, MinDuration, ExponentialAlpha);
 
-				// 3. [기절 배달] 
 				if (FlareEffectClass)
 				{
 					FGameplayEffectSpecHandle StunSpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(FlareEffectClass, GetAbilityLevel(), ContextHandle);
 					if (StunSpecHandle.IsValid())
 					{
-						// SetByCaller 방식으로 계산된 시간을 주입
 						UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
 							StunSpecHandle,
 							FGameplayTag::RequestGameplayTag(FName("Data.Damage.Duration")),
@@ -121,7 +118,6 @@ void UAoeStunBase::OnFlareEventReceived(FGameplayEventData Payload)
 					
 						TargetASC->ApplyGameplayEffectSpecToSelf(*StunSpecHandle.Data.Get());
 					
-						UE_LOG(LogTemp, Log, TEXT("%s 에게 데미지 적용 및 %.2f초 스턴!"), *Target->GetName(), StunDuration);
 					}
 				}
 			}

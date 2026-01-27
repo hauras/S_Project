@@ -12,6 +12,8 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Space = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Space"), FString("InputTag_Space"));
 	GameplayTags.InputTag_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.1"), FString("InputTag_1"));
 	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.2"), FString("InputTag_2"));
+	GameplayTags.InputTag_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.3"), FString("InputTag_3"));
+
 	GameplayTags.InputTag_Interact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Interact"), FString("Interact"));
 	GameplayTags.InputTag_Inventory = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Inventory"), FString("Inventory"));
 	GameplayTags.InputTag_Tag = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Tag"), FString("Tag"));
@@ -41,6 +43,9 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 
 	GameplayTags.Ability_Skill_Teleport = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.Teleport"), FString("Teleport"));
 	GameplayTags.Cooldown_Teleport = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Teleport"), FString("Cooldown_Teleport"));
+
+	GameplayTags.Ability_Skill_BlackHole = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.BlackHole"), FString("BlackHole"));
+	GameplayTags.Cooldown_BlackHole = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.BlackHole"), FString("Cooldown_BlackHole"));
 
 	// 공격 부위
 	GameplayTags.Combat_Socket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Combat.Socket.Weapon"), FString("Combat_Socket_Weapon"));

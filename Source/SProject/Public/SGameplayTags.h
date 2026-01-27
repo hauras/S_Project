@@ -16,6 +16,7 @@ public:
 	FGameplayTag InputTag_Space;
 	FGameplayTag InputTag_1;
 	FGameplayTag InputTag_2;
+	FGameplayTag InputTag_3;
 	FGameplayTag InputTag_Interact;
 	FGameplayTag InputTag_Inventory;
 	FGameplayTag InputTag_Tag;
@@ -45,6 +46,9 @@ public:
 
 	FGameplayTag Ability_Skill_Teleport;
 	FGameplayTag Cooldown_Teleport;
+
+	FGameplayTag Ability_Skill_BlackHole;
+	FGameplayTag Cooldown_BlackHole;
 	
 	FGameplayTag Combat_Socket_Weapon;
 	FGameplayTag Combat_Socket_Fist_Right;

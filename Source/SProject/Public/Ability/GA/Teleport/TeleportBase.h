@@ -24,15 +24,14 @@ protected:
 	TObjectPtr<UAnimMontage> AnimMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Blink|Tag")
-	FGameplayTag TeleportTag; // Event.Teleport (노티파이용)
+	FGameplayTag TeleportTag; 
 
 	UPROPERTY(EditDefaultsOnly, Category = "Blink|Tag")
-	FGameplayTag TeleportCueTag; // GameplayCue.Ability.Skill.Teleport (이펙트용)
+	FGameplayTag TeleportCueTag; 
 
 	UPROPERTY(EditDefaultsOnly, Category = "Blink|Stats")
-	float TeleportStrength = 5000.f; // 돌진 힘
+	float TeleportStrength = 5000.f; 
 
-	// [포폴 포인트] 잔상용 파티클 (에디터에서 P_PhaseLinkForm 선택)
 	UPROPERTY(EditDefaultsOnly, Category = "Blink|Visual")
 	TObjectPtr<UNiagaraSystem> TrailParticle;
 

@@ -18,8 +18,7 @@ void UTeleportBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, con
 
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
 	if (!Character) return;
-
-	// 1. 애니메이션 노티파이 대기 (손을 뻗는 순간 실행)
+	
 	UAbilityTask_WaitGameplayEvent* EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, TeleportTag);
 	EventTask->EventReceived.AddDynamic(this, &UTeleportBase::OnTeleportEventReceived);
 	EventTask->ReadyForActivation();
@@ -41,7 +40,6 @@ void UTeleportBase::OnTeleportEventReceived(FGameplayEventData Payload)
 	FVector InputDir = PlayerCharacter->GetLastMovementInputVector();
 	FVector DashDir = InputDir.IsNearlyZero() ? PlayerCharacter->GetActorForwardVector() : InputDir.GetSafeNormal();
 
-	// 4. 이펙트 실행 (GC_Teleport_Actor 스폰)
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
 	{
 		FGameplayCueParameters Params;
@@ -50,17 +48,14 @@ void UTeleportBase::OnTeleportEventReceived(FGameplayEventData Payload)
 		ASC->AddGameplayCue(TeleportCueTag, Params);
 	}
 
-	// 5. [포폴 핵심] 잔상 타이머 시작 (0.03초마다 현재 위치에 잔상 생성)
 	GetWorld()->GetTimerManager().SetTimer(TrailTimerHandle, this, &UTeleportBase::SpawnTrail, 0.03f, true);
 
-	// 6. 물리 발사
 	UCharacterMovementComponent* MoveComp = PlayerCharacter->GetCharacterMovement();
 	if (MoveComp)
 	{
 		MoveComp->bOrientRotationToMovement = false; // 대쉬 중 회전 고정
 		MoveComp->GroundFriction = 0.f; // 마찰력 제거로 매끄럽게 이동
 	}
-	// 바닥에 박히는 걸 방지하기 위해 Z축으로 힘을 살짝 줌(200.f)
 	PlayerCharacter->LaunchCharacter(DashDir * TeleportStrength + FVector(0.f, 0.f, 200.f), true, true);
 }
 
@@ -76,24 +71,17 @@ void UTeleportBase::SpawnTrail()
 			UNiagaraComponent* NiagaraComp =
 				UNiagaraFunctionLibrary::SpawnSystemAttached(
 					TrailParticle,
-					Character->GetMesh(),          // 🔥 스켈레탈 메시
-					NAME_None,                     // 소켓 없으면 None
+					Character->GetMesh(),         
+					NAME_None,                    
 					FVector::ZeroVector,
 					FRotator::ZeroRotator,
 					EAttachLocation::SnapToTarget,
-					true                           // Auto Destroy
+					true                         
 				);
 
 			if (NiagaraComp)
 			{
-				// Niagara User Parameter에 SkeletalMesh 전달
-				NiagaraComp->SetNiagaraVariableObject(
-					TEXT("MyMesh"),
-					Character->GetMesh()
-				);
-
-				UE_LOG(LogTemp, Warning, TEXT("Trail Spawned & Mesh Set: %s"),
-					*Character->GetMesh()->GetName());
+				NiagaraComp->SetNiagaraVariableObject(TEXT("MyMesh"),Character->GetMesh());
 			}
 		}
 	}
@@ -106,18 +94,17 @@ void UTeleportBase::OnMontageEnded()
 
 void UTeleportBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	// 7. 종료 시 리소스 정리
-	GetWorld()->GetTimerManager().ClearTimer(TrailTimerHandle); // 타이머 끄기
+	GetWorld()->GetTimerManager().ClearTimer(TrailTimerHandle);
 
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
 	{
-		ASC->RemoveGameplayCue(TeleportCueTag); // 이펙트 제거 (GC_Actor의 OnRemove 호출 -> 도착 이펙트 쾅!)
+		ASC->RemoveGameplayCue(TeleportCueTag); 
 	}
 
 	if (ACharacter* Character = Cast<ACharacter>(ActorInfo->AvatarActor.Get()))
 	{
 		Character->GetCharacterMovement()->bOrientRotationToMovement = true; // 회전 복구
-		Character->GetCharacterMovement()->GroundFriction = 8.f; // 마찰력 복구
+		Character->GetCharacterMovement()->GroundFriction = 8.f; 
 	}
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
