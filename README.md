@@ -25,7 +25,7 @@
         <b><a href="#-학습-목표-및-달성">📌 학습 목표 및 달성</a></b><br>
         <b><a href="#-주요-개발">🔨 주요 개발</a></b><br>
         <b><a href="#troubleshooting-eternal-return">🛠️ 문제 해결</a></b><br>
-        &nbsp;&nbsp; └ <a href="#deferred-rendering"> "추후 추가" </a><br>
+        &nbsp;&nbsp; └ <a href="#deferred-rendering"> 레벨 전환 시 캐릭터 태그 데이터 유실 및 동기화 이슈 </a><br>
         &nbsp;&nbsp; └ <a href="#navmesh-optimization">"추후 추가"</a><br>
         &nbsp;&nbsp; └ <a href="#quadtree-optimization">"추후 추가"</a><br>
         &nbsp;&nbsp; └ <a href="#fsm-to-bt">"추후 추가"</a>
@@ -60,7 +60,7 @@
 **2. 📌 [학습 목표 및 달성](#-학습-목표-및-달성)**
 
 **3. 🔨 [주요 개발 기능](#주요개발-eternal-return)** <br>
-&nbsp;&nbsp; └ [스팀 연](#deferred-rendering)<br>
+&nbsp;&nbsp; └ [스팀 연동](#deferred-rendering)<br>
 &nbsp;&nbsp; └ [멀티플레이](#gpu-instancing)<br>
 &nbsp;&nbsp; └ [캐릭터 태그 시스템](#quad-tree)<br>
 &nbsp;&nbsp; └ [추후 추가](#navmesh)<br>
