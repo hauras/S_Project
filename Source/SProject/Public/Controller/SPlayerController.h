@@ -30,7 +30,7 @@ public:
 	void SetCrosshairVisibility(bool bVisible);
 
 	UFUNCTION(Client, Reliable)
-	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter);
+	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter, bool bIsSynergy);
 
 	UFUNCTION(Server, Reliable)
 	void Server_RequestCharacterSwap(int32 NewIndex);

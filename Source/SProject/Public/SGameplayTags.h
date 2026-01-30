@@ -67,9 +67,14 @@ public:
 	FGameplayTag Event_Montage_Summon;
 	
 	FGameplayTag State_Stun;
-
+	FGameplayTag State_Mark_Warrior;
+	FGameplayTag State_Mark_Mage;
+	FGameplayTag Ability_Synergy_Explosion;
+	
 	FGameplayTag Character_Warrior;
 	FGameplayTag Character_Mage;
+
+	
 private:
 	static FSGameplayTags GameplayTags;
 };

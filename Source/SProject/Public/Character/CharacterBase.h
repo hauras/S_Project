@@ -60,6 +60,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
 	TSubclassOf<UGameplayEffect> MaxVitalAttributes;
+
+	UPROPERTY(EditAnywhere, Category = "Attributes")
+	TSubclassOf<UGameplayEffect> RegenEffectClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attributes")
+	TSubclassOf<UGameplayEffect> MarkEffectClass;
 	
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
 	virtual auto InitializeDefaultAttributes() const -> void;
@@ -72,8 +78,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	bool bIsDead = false;
 
-	UPROPERTY(EditAnywhere, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> RegenEffectClass;
+	
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")

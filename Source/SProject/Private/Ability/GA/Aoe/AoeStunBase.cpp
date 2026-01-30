@@ -85,6 +85,8 @@ void UAoeStunBase::OnFlareEventReceived(FGameplayEventData Payload)
 
 		if (CombatInterface && !CombatInterface->IsDead())
 		{
+			ExecuteSynergyLogic(Target);
+
 			UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
 			if (TargetASC)
 			{
@@ -123,7 +125,6 @@ void UAoeStunBase::OnFlareEventReceived(FGameplayEventData Payload)
 			}
 		}
 	}
-	// 추후 여기에 나이아가라 폭발 이펙트 소환 코드를 넣으세요!
 }
 
 void UAoeStunBase::OnMontageEnded()

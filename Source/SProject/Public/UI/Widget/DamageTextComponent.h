@@ -16,4 +16,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetDamageText(float Damage);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetDamageColor(FLinearColor NewColor);
 };

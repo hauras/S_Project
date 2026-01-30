@@ -15,23 +15,20 @@ class SPROJECT_API ATeleportCueBase : public AGameplayCueNotify_Actor
 public:
 	ATeleportCueBase();
 
-	// 시전 시 (출발 + 오라 부착)
 	virtual bool OnActive_Implementation(AActor* MyTarget, const FGameplayCueParameters& Parameters) override;
 
-	// 제거 시 (도착 이펙트)
 	virtual bool OnRemove_Implementation(AActor* MyTarget, const FGameplayCueParameters& Parameters) override;
 
 protected:
-	// --- 에셋 설정 (블루프린트 디테일창에서 선택 가능) ---
 	
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
-	TObjectPtr<UParticleSystem> StartEffect; // P_PhaseLinkActivate (출발)
+	TObjectPtr<UParticleSystem> StartEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
-	TObjectPtr<UParticleSystem> DashAuraEffect; // P_LinkPullAura (이동 중)
+	TObjectPtr<UParticleSystem> DashAuraEffect; 
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
-	TObjectPtr<UParticleSystem> EndEffect; // P_PhaseLinkImpact (도착)
+	TObjectPtr<UParticleSystem> EndEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	FName AttachSocketName = FName("pelvis");

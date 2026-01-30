@@ -26,6 +26,7 @@ void USAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME_CONDITION_NOTIFY(USAttributeSet, Mana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(USAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(USAttributeSet, AttackPower, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(USAttributeSet, MarkChance, COND_None, REPNOTIFY_Always);
 
 }
 
@@ -50,20 +51,20 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 
+	FGameplayTag SynergyTag = FGameplayTag::RequestGameplayTag(FName("Damage.Type.Synergy"));
+	bool bIsSynergy = Data.EffectSpec.CapturedSourceTags.GetSpecTags().HasTag(SynergyTag);
+	
 	bool bHealthChanged = false;
 	const float LocalIncomingDamage = GetIncomingDamage();
 
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
-		
 		SetIncomingDamage(0.f);
 
 		if (LocalIncomingDamage > 0.f)
 		{
 			const float NewHealth = GetHealth() - LocalIncomingDamage;
-			
 			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
-			
 			bHealthChanged = true; 
 		}
 	}
@@ -78,7 +79,7 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 		const float CurrentHealth = GetHealth();
 		const float CurrentMaxHealth = GetMaxHealth();
 
-		// A. 사망 판정 
+		// A. 사망 판정 (기존 유지)
 		if (CurrentHealth <= 0.f)
 		{
 			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
@@ -88,19 +89,16 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 			return; 
 		}
 
-		// B. 보스
+		// B. 보스 로직 (기존 유지)
 		if (ABossCharacter* Boss = Cast<ABossCharacter>(Props.TargetAvatarActor))
 		{
 			Boss->PlayHitReactEffect();
-
-			// 2) 소환 페이즈 체크 (체력 50% 이하 & 아직 소환 전)
 			if (!Boss->bHasSummoned && CurrentMaxHealth > 0.f)
 			{
 				float HealthPercent = CurrentHealth / CurrentMaxHealth;
 				if (HealthPercent <= 0.5f)
 				{
 					Boss->bHasSummoned = true;
-					
 					if (AAIController* AIC = Cast<AAIController>(Boss->GetController()))
 					{
 						if (UBlackboardComponent* BB = AIC->GetBlackboardComponent())
@@ -111,12 +109,10 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 				}
 			}
 		}
-		// C. 타겟이 일반 몬스터나 플레이어인 경우
+		// C. 타겟 피격 로직 (기존 유지)
 		else
 		{
 			bool bIsStunned = Props.TargetASC->HasMatchingGameplayTag(FSGameplayTags::Get().State_Stun);
-
-			// 2. 기절 상태가 아닐 때
 			if (!bIsStunned)
 			{
 				FGameplayTagContainer TagContainer;
@@ -125,7 +121,8 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 			}
 		}
 
-		ShowFloatingText(Props, LocalIncomingDamage);
+		// [수정] bIsSynergy 정보를 같이 넘겨줍니다.
+		ShowFloatingText(Props, LocalIncomingDamage, bIsSynergy);
 	}
 }
 
@@ -160,13 +157,14 @@ void USAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& D
 	}
 }
 
-void USAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage) const
+void USAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage, bool bIsSynergy) const
 {
 	if (Props.SourceCharacter != Props.TargetCharacter)
 	{
 		if (ASPlayerController* PC = Cast<ASPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0)))
 		{
-			PC->ShowDamageNumber(Damage, Props.TargetCharacter);
+			// 여기서 bIsSynergy를 넘겨줍니다.
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bIsSynergy);
 		}
 	}
 }
@@ -194,5 +192,11 @@ void USAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) con
 void USAttributeSet::OnRep_AttackPower(const FGameplayAttributeData& OldAttackPower) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, AttackPower, OldAttackPower);
+}
+
+void USAttributeSet::OnRep_MarkChance(const FGameplayAttributeData& OldMarkChance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USAttributeSet, MarkChance, OldMarkChance);
+
 }
 

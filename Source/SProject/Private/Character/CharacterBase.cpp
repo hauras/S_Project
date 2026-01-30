@@ -88,6 +88,12 @@ void ACharacterBase::InitializeDefaultAttributes() const
 	{
 		ApplyEffectToSelf(RegenEffectClass, 1.f);
 	}
+
+	if (MarkEffectClass)
+	{
+		ApplyEffectToSelf(MarkEffectClass, 1.f);
+		UE_LOG(LogTemp, Warning, TEXT("MarkChance GE Applied!")); // 적용 확인용 로그
+	}
 }
 
 void ACharacterBase::InitAbilityActorInfo()

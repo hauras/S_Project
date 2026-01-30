@@ -65,6 +65,9 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Event_Montage_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Event.Montage.Summon"), FString("Montage_Summon"));
 
 	GameplayTags.State_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Stun"), FString("Stun"));
+	GameplayTags.State_Mark_Warrior = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Mark.Warrior"), FString("Mark.Warrior"));
+	GameplayTags.State_Mark_Mage = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Mark.Mage"), FString("Mark.Mage"));
+	GameplayTags.Ability_Synergy_Explosion = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Synergy.Explosion"), FString("Synergy.Explosion"));
 
 	GameplayTags.Character_Warrior = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Character.Warrior"), FString("Warrior"));
 	GameplayTags.Character_Mage = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Character.Mage"), FString("Mage"));

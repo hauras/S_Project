@@ -104,7 +104,12 @@ void UBeamAttackBase::TraceAndDamageTick()
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(AvatarPawn);
 
-	float BeamRadius = 40.f; 
+	AActor* HitEnemy = HitResult.GetActor(); // 이게 바로 그 녀석!
+    
+	// 시너지 로직 실행 (방금 만든 부모 함수 호출)
+	ExecuteSynergyLogic(HitEnemy);
+	
+	float BeamRadius = 50.f; 
 	bool bHit = GetWorld()->SweepSingleByChannel(
 		HitResult, 
 		TraceStart, 

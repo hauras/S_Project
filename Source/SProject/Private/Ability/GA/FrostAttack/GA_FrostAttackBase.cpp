@@ -55,32 +55,28 @@ void UGA_FrostAttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 			const float OffsetX = Radius * FMath::Cos(Radian);
 			const float OffsetY = Radius * FMath::Sin(Radian);
 			
-			// 1. 캐릭터 허리 높이의 '공중 위치'를 먼저 계산합니다.
 			FVector LocationInAir = SpawnLocation + FVector(OffsetX, OffsetY, 0.f);
 
-			// 2. 바닥을 찾기 위해 라인 트레이스를 시작할 지점과 끝 지점을 설정합니다.
-			// 공중 위치에서 시작해서, 그보다 1000 유닛 아래까지 레이저를 쏩니다.
 			FVector TraceStart = LocationInAir;
 			FVector TraceEnd = LocationInAir - FVector(0.f, 0.f, 1000.f);
 
-			// 3. 라인 트레이스를 실행합니다.
 			FHitResult HitResult;
 			TArray<AActor*> ActorsToIgnore;
-			ActorsToIgnore.Add(Character); // 자기 자신은 무시
+			ActorsToIgnore.Add(Character);
 			
 			UKismetSystemLibrary::LineTraceSingle(
 				GetWorld(),
 				TraceStart,
 				TraceEnd,
-				UEngineTypes::ConvertToTraceType(ECC_Visibility), // 눈에 보이는 모든 것과 충돌
+				UEngineTypes::ConvertToTraceType(ECC_Visibility), 
 				false,
 				ActorsToIgnore,
-				EDrawDebugTrace::None, // 디버그 라인을 보려면 ForDuration으로 변경
+				EDrawDebugTrace::None, 
 				HitResult,
 				true
 			);
 
-			FVector FinalImpactLocation = LocationInAir; // 기본값은 공중 위치
+			FVector FinalImpactLocation = LocationInAir; 
 			if (HitResult.bBlockingHit)
 			{
 				FinalImpactLocation = HitResult.ImpactPoint;
@@ -111,8 +107,12 @@ void UGA_FrostAttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	{
 		if (DamageEffectClass)
 		{
-			FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, GetAbilityLevel());
-			
+			FGameplayEffectContextHandle MainContext = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
+			MainContext.AddInstigator(GetAvatarActorFromActorInfo(), GetAvatarActorFromActorInfo());
+			MainContext.AddSourceObject(this);
+
+			FGameplayEffectSpecHandle DamageSpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), MainContext);
+		
 			for (AActor* TargetActor : OverlappingActors)
 			{
 				ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetActor);
@@ -122,6 +122,8 @@ void UGA_FrostAttackBase::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 					if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor))
 					{
 						TargetASC->ApplyGameplayEffectSpecToSelf(*DamageSpecHandle.Data.Get());
+
+						ExecuteSynergyLogic(TargetActor); 
 					}
 				}
 			}
