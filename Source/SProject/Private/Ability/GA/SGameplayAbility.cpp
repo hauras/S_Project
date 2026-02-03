@@ -25,24 +25,15 @@ void USGameplayAbility::ExecuteSynergyLogic(AActor* Target)
 			// [핵심] 컨텍스트 생성
 			FGameplayEffectContextHandle Context = MyASC->MakeEffectContext();
             
-			// 가해자 정보 주입 (UI 데미지 숫자를 위해 필요)
 			Context.AddInstigator(GetAvatarActorFromActorInfo(), GetAvatarActorFromActorInfo());
 			Context.AddSourceObject(GetAvatarActorFromActorInfo());
-
-			/** 
-			 * [이펙트 해결사] 위치 정보 주입 
-			 * 이 코드가 없으면 GameplayCueParameters.Location이 (0,0,0)으로 전달되어 
-			 * 이펙트가 맵 중앙 바닥에서 터지거나 아예 안 보일 수 있습니다.
-			 */
 			Context.AddOrigin(Target->GetActorLocation());
 
 			FGameplayEffectSpecHandle Spec = MyASC->MakeOutgoingSpec(SynergyEffectClass, GetAbilityLevel(), Context);
 			if (Spec.IsValid())
 			{
-				// [수정] 내 ASC에서 타겟의 ASC로 효과를 적용합니다.
 				MyASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
 			}
-			UE_LOG(LogTemp, Warning, TEXT("Synergy Exploded!!!"));
 		}
 		else
 		{
@@ -54,7 +45,6 @@ void USGameplayAbility::ExecuteSynergyLogic(AActor* Target)
 
 				if (RandomRoll <= Chance)
 				{
-					// [수정] 표식 생성 시에도 동일하게 위치 정보를 담은 컨텍스트 사용
 					FGameplayEffectContextHandle MarkContext = MyASC->MakeEffectContext();
 					MarkContext.AddInstigator(GetAvatarActorFromActorInfo(), GetAvatarActorFromActorInfo());
 					MarkContext.AddOrigin(Target->GetActorLocation());
@@ -69,6 +59,7 @@ void USGameplayAbility::ExecuteSynergyLogic(AActor* Target)
 		}
 	}
 }
+
 TArray<FHitResult> USGameplayAbility::GetHitResultFromTargetData(
 	const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, bool bDrawDebug, bool bIgnoreSelf) const
 {

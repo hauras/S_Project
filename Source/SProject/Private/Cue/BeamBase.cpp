@@ -23,8 +23,7 @@ bool ABeamBase::OnActive_Implementation(AActor* MyTarget, const FGameplayCuePara
 
 		if (ACharacter* Character = Cast<ACharacter>(OwnerActor))
 		{
-			// ★ 핵심: SnapToTarget이 아니라 KeepWorldTransform으로 붙여야 돼!
-			// 그래야 소켓이 액터를 3시 방향으로 꺾어버리는 걸 막을 수 있어.
+
 			AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::KeepWorldTransform, AttachedSocketName);
 		}
 		BeamPSC->Activate(true);
@@ -45,21 +44,16 @@ void ABeamBase::Tick(float DeltaSeconds)
 			Start = Character->GetMesh()->GetSocketLocation(AttachedSocketName);
 		}
 		
-		// 2. 끝점 계산 (여기도 각도 제한 적용)
-		FVector End = GetBeamEndLocation(); // 아래 함수 수정 필요
+		FVector End = GetBeamEndLocation(); 
 		FVector Dir = End - Start;
 
 		SetActorLocation(Start);
 
-		// 3. 회전 설정 (보라색 선과 일치)
 		FRotator TargetRot = Dir.Rotation();
 		SetActorRotation(TargetRot);
-
-		// 4. 이펙트 방향 보정 (에셋이 하늘로 가면 이거 필수)
-		// 3시 방향 해결을 위해 Yaw도 -90 보정 (필요하면)
+		
 		BeamPSC->SetRelativeRotation(FRotator(-90.f, -90.f, 0.f)); 
 
-		// 5. 길이 조절
 		float Distance = Dir.Size();
 		BeamPSC->SetWorldScale3D(FVector(Distance / 100.f, 2.0f, 2.0f));
 	}
@@ -76,7 +70,6 @@ FVector ABeamBase::GetBeamEndLocation() const
 
 	FRotator FixedRotation = ViewRotation;
 	FixedRotation.Pitch = FMath::ClampAngle(FixedRotation.Pitch, -45.0f, 10.0f);
-	// -------------------------------
 
 	FVector TraceStart = ViewLocation + (FixedRotation.Vector() * 100.f);
 	FVector TraceEnd = TraceStart + (FixedRotation.Vector() * 5000.f);

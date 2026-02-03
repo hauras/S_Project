@@ -21,7 +21,11 @@ ABlackHole::ABlackHole()
 
 	ParticleComp = CreateDefaultSubobject<UParticleSystemComponent>("ParticleComp");
 	ParticleComp->SetupAttachment(RootComponent);
-	
+
+	bReplicates = true;
+
+	// 움직이는 액터(투사체 등)라면 위치값 복제도 켜줘야 합니다.
+	AActor::SetReplicateMovement(true); 
 }
 void ABlackHole::BeginPlay()
 {
@@ -67,16 +71,13 @@ void ABlackHole::PullEnemy()
 			Direction = Direction.GetSafeNormal();
 
 			FVector Velocity = Direction * PullPower;
-			DrawDebugSphere(GetWorld(), GetActorLocation(), SphereComp->GetScaledSphereRadius(), 32, FColor::Blue, false, 0.1f);
 
 			Enemy->LaunchCharacter(Velocity, true, true);
 
 			if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Enemy))
 			{
-				// 가해자(마법사)의 ASC를 가져옴
 				UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetInstigator());
 
-				// 투사체와 100% 동일한 Context 생성
 				FGameplayEffectContextHandle EffectContext = SourceASC ? SourceASC->MakeEffectContext() : TargetASC->MakeEffectContext();
 				EffectContext.AddSourceObject(this);
 
@@ -84,12 +85,10 @@ void ABlackHole::PullEnemy()
 				
 				if (SpecHandle.IsValid())
 				{
-					// 태그 없이 바로 적용 (에셋에 설정된 값을 따름)
 					TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 				}
 			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Detected Actor: %s"), *Actor->GetName());
 
 	}
 

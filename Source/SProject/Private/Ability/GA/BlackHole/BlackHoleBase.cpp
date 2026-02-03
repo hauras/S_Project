@@ -47,8 +47,6 @@ void UBlackHoleBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	
 }
 
-
-
 void UBlackHoleBase::OnMontageEnded()
 {
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);

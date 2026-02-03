@@ -30,6 +30,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ability")
 	FGameplayTag FireEventTag;
+
 private:
 	
 	UFUNCTION()

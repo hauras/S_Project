@@ -83,7 +83,7 @@ public:
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS(USAttributeSet, IncomingDamage);
 
-	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_AttackPower, Category = "Meta Attributes")
 	FGameplayAttributeData MarkChance;
 	ATTRIBUTE_ACCESSORS(USAttributeSet, MarkChance);
 	

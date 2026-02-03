@@ -106,7 +106,9 @@ void UGA_ProjectileBase::SpawnProjectile(FGameplayEventData Payload)
 
     if (Projectile)
     {
-        Projectile->DamageEffectClass = DamageEffectClass; 
+        Projectile->DamageEffectClass = DamageEffectClass;
+    	Projectile->TargetTag = MarkTag; 
+
         Projectile->FinishSpawning(SpawnTransform);
     }
 }
