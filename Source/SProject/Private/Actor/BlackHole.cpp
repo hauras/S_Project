@@ -103,7 +103,6 @@ void ABlackHole::Explode()
 	TArray<AActor*> OverlappingActors;
 	SphereComp->GetOverlappingActors(OverlappingActors);
 
-	// 3. GAS 방식으로 한 명씩 데미지 봉투(GE) 전달
 	for (AActor* Actor : OverlappingActors)
 	{
 		ACharacter* Enemy = Cast<ACharacter>(Actor);
@@ -114,7 +113,6 @@ void ABlackHole::Explode()
 				UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetInstigator());
 				FGameplayEffectContextHandle Context = SourceASC ? SourceASC->MakeEffectContext() : TargetASC->MakeEffectContext();
 
-				// [중요] 이번엔 '폭발용 GE'를 사용합니다.
 				FGameplayEffectSpecHandle SpecHandle = TargetASC->MakeOutgoingSpec(ExplosionDamageEffectClass, 1.f, Context);
                 
 				if (SpecHandle.IsValid())
@@ -125,7 +123,6 @@ void ABlackHole::Explode()
 		}
 	}
 
-	// 4. 이펙트 및 파괴
 	if (ExplosionEffect) 
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 

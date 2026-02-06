@@ -112,7 +112,21 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 		// C. 타겟 피격 로직 (기존 유지)
 		else
 		{
+			// 1. 빙결(Freeze) 상태인지 가장 먼저 확인합니다.
+			// Freeze는 Stun의 하위 태그이므로, 빙결 상태면 bIsFrozen은 true가 됩니다.
+			bool bIsFrozen = Props.TargetASC->HasMatchingGameplayTag(FSGameplayTags::Get().State_Stun_Freeze);
+			
+			// 2. 빙결 상태라면 피격 리액션 자체를 아예 실행하지 않고 리턴합니다.
+			// 그래야 이전에 GameplayCue에서 멈춰놓은 '박제 애니메이션'이 유지됩니다.
+			if (bIsFrozen)
+			{
+				return;
+			}
+
+			// 3. 빙결은 아니지만 일반적인 스턴(Stun) 상태인지 확인합니다.
 			bool bIsStunned = Props.TargetASC->HasMatchingGameplayTag(FSGameplayTags::Get().State_Stun);
+			
+			// 4. 어떤 제어 방해 상태도 아닐 때만 '피격 리액션' 어빌리티를 실행합니다.
 			if (!bIsStunned)
 			{
 				FGameplayTagContainer TagContainer;
@@ -121,7 +135,6 @@ void USAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 			}
 		}
 
-		// [수정] bIsSynergy 정보를 같이 넘겨줍니다.
 		ShowFloatingText(Props, LocalIncomingDamage, bIsSynergy);
 	}
 }
@@ -161,9 +174,13 @@ void USAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Dama
 {
 	if (Props.SourceCharacter != Props.TargetCharacter)
 	{
-		if (ASPlayerController* PC = Cast<ASPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0)))
+		// [수정] 0번 컨트롤러를 찾는 게 아니라, 공격자(Source)가 실제 조종 중인 컨트롤러를 바로 사용합니다.
+		// Props.SourceController는 서버에 존재하는 해당 클라이언트의 진짜 대리인입니다.
+		ASPlayerController* PC = Cast<ASPlayerController>(Props.SourceController);
+		
+		if (PC)
 		{
-			// 여기서 bIsSynergy를 넘겨줍니다.
+			// 이제 때린 그 사람(PC)에게만 "너네 화면에 숫자 띄워라"라고 RPC가 정확히 날아갑니다.
 			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bIsSynergy);
 		}
 	}

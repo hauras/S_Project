@@ -7,6 +7,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/Character.h"
+#include "Actor/FrostField.h" 
 
 
 AProjectile::AProjectile()
@@ -66,7 +67,10 @@ void AProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (!bIsShard) return;
-
+	if (IsValid(HomingTarget))
+	{
+		DrawDebugLine(GetWorld(), GetActorLocation(), HomingTarget->GetActorLocation(), FColor::Green, false, 0.1f, 0, 5.0f);
+	}
 	OrbitData.TimeElapsed += DeltaSeconds;
 
 	// 1. 회전 로직 (삼각함수로 적 주변 뱅글 돌리기)
@@ -92,25 +96,44 @@ void AProjectile::Tick(float DeltaSeconds)
 	}
 }
 
-void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!HasAuthority()) return;
-	if (OtherActor == GetInstigator() || OtherActor == this || OtherActor == nullptr) return;
-	if (bIsShard && OrbitData.bIsOrbiting) return; // 도는 중엔 충돌 무시
 
+	// 1. 기초 필터링 (나, 소환사, 유효하지 않은 액터)
+	if (OtherActor == GetInstigator() || OtherActor == this || OtherActor == nullptr) return;
+
+	/** 
+	 * [핵심 수정] 장판 무시 로직
+	 * 만약 부딪힌 대상이 장판(AFrostField)이라면, 파괴하지 않고 그냥 함수를 종료합니다. 
+	 * 이렇게 해야 투사체가 장판을 통과하면서 속도만 느려집니다.
+	 */
+	if (OtherActor->IsA(AFrostField::StaticClass()))
+	{
+		return;
+	}
+
+	// 2. 조각(Shard)이 회전(Orbiting) 중일 때는 다른 충돌 무시
+	if (bIsShard && OrbitData.bIsOrbiting) return;
+
+	// 3. 데미지 및 분열 판정
 	if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 	{
 		UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetInstigator());
 		FGameplayEffectContextHandle Context = SourceASC ? SourceASC->MakeEffectContext() : TargetASC->MakeEffectContext();
+		
+		// 데미지 적용
 		TargetASC->ApplyGameplayEffectSpecToSelf(*TargetASC->MakeOutgoingSpec(DamageEffectClass, 1.f, Context).Data.Get());
 
+		// 시너지 분열 체크 (원본일 때만)
 		if (!bIsShard && TargetASC->HasMatchingGameplayTag(TargetTag))
 		{
 			Shatter(OtherActor); 
 		}
 	}
 
-	// [폭발 연출] 한 번 터지는 연출은 GameplayCue가 가장 효율적
+	// 4. [폭발 연출] 적이나 벽에 부딪혀서 파괴될 때만 실행
 	if (ImpactCueTag.IsValid())
 	{
 		if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetInstigator()))
@@ -121,6 +144,7 @@ void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		}
 	}
 	
+	// 5. 최종 파괴
 	Destroy(); 
 }
 

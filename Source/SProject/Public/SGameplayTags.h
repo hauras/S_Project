@@ -36,6 +36,9 @@ public:
 	FGameplayTag Ability_Skill_IceProjectile;
 	FGameplayTag Cooldown_IceProjectile;
 
+	FGameplayTag Ability_Skill_FrostField;
+	FGameplayTag Cooldown_FrostField;
+	
 	FGameplayTag Ability_Skill_MageAttack;
 
 	FGameplayTag Ability_Skill_Flare;
@@ -67,6 +70,8 @@ public:
 	FGameplayTag Event_Montage_Summon;
 	
 	FGameplayTag State_Stun;
+	FGameplayTag State_Stun_Freeze;
+	
 	FGameplayTag State_Mark_Warrior;
 	FGameplayTag State_Mark_Mage;
 	FGameplayTag Ability_Synergy_Explosion;

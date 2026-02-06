@@ -32,6 +32,9 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Ability_Skill_IceProjectile = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.IceProjectile"), FString("IceProjectile"));
 	GameplayTags.Cooldown_IceProjectile = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.IceProjectile"), FString("Cooldown_IceProjectile"));
 
+	GameplayTags.Ability_Skill_FrostField = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.FrostField"), FString("FrostField"));
+	GameplayTags.Cooldown_FrostField = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.FrostField"), FString("Cooldown_FrostField"));
+
 	// 마법사 스킬
 	GameplayTags.Ability_Skill_MageAttack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Skill.MageAttack"), FString("MageAttack"));
 
@@ -65,6 +68,8 @@ void FSGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Event_Montage_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Event.Montage.Summon"), FString("Montage_Summon"));
 
 	GameplayTags.State_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Stun"), FString("Stun"));
+	GameplayTags.State_Stun_Freeze = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Stun.Freeze"), FString("Freeze"));
+
 	GameplayTags.State_Mark_Warrior = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Mark.Warrior"), FString("Mark.Warrior"));
 	GameplayTags.State_Mark_Mage = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Mark.Mage"), FString("Mark.Mage"));
 	GameplayTags.Ability_Synergy_Explosion = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("State.Synergy.Explosion"), FString("Synergy.Explosion"));
