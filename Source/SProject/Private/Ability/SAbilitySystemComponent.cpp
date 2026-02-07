@@ -9,24 +9,26 @@ void USAbilitySystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// bStartupAbilitiesGiven 변수를 복제 목록에 등록합니다.
-	// 이 코드가 있어야 서버의 true 값이 클라이언트로 전달됩니다.
-	DOREPLIFETIME(USAbilitySystemComponent, bStartupAbilitiesGiven);
+	DOREPLIFETIME_CONDITION_NOTIFY(USAbilitySystemComponent, bStartupAbilitiesGiven, COND_None, REPNOTIFY_Always);
+	
 }
 
 void USAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
 {
+	bStartupAbilitiesGiven = false;
+
 	for (TSubclassOf<UGameplayAbility> Ability : StartupAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Ability, 1);
 		if (const USGameplayAbility* SAbility = Cast<USGameplayAbility>(AbilitySpec.Ability))
 		{
 			AbilitySpec.DynamicAbilityTags.AddTag(SAbility->InputTag);
-
 			GiveAbility(AbilitySpec);
 		}
 	}
+
 	bStartupAbilitiesGiven = true;
+
 	OnRep_StartupAbilitiesGiven();
 }
 
@@ -62,7 +64,6 @@ void USAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
 	{
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
 		{
-			// [수정] Held에서는 "누르고 있음" 상태만 업데이트 (재실행X)
 			AbilitySpecInputPressed(AbilitySpec);
 		}
 	}
@@ -76,10 +77,8 @@ void USAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& Input
 	{
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
 		{
-			// 1. 입력이 해제되었음을 시스템에 알림 (내부 상태 업데이트)
 			AbilitySpecInputReleased(AbilitySpec);
 
-			// 2. 만약 활성화된 스킬이라면, '입력 해제 이벤트'를 복제하여 서버/태스크에 전달
 			if (AbilitySpec.IsActive())
 			{
 				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, AbilitySpec.GetAbilityInstances().Last()->GetCurrentActivationInfoRef().GetActivationPredictionKey());

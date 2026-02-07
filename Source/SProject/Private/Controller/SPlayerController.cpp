@@ -44,7 +44,6 @@ void ASPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACh
 		
 		FVector Center = TargetCharacter->GetActorLocation();
 
-		// 1. [디테일] 시너지 데미지라면 일반 데미지보다 살짝 더 위에서 나오게 설정 (가독성 업)
 		float MinZ = bIsSynergy ? 100.f : 60.f;
 		float MaxZ = bIsSynergy ? 130.f : 90.f;
 
@@ -56,40 +55,37 @@ void ASPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACh
 
 		DamageText->SetWorldLocation(Center + RandomOffset);
 
-		// 2. [핵심] 시너지 여부에 따라 색상 지정
-		// SetDamageColor는 UDamageTextComponent에 정의되어 있어야 합니다 (아래 참고)
 		if (bIsSynergy)
 		{
-			// 시너지: 보라색 (사이킥+얼음 느낌)
 			DamageText->SetDamageColor(FLinearColor(0.6f, 0.1f, 1.0f)); 
 		}
 		else
 		{
-			// 일반: 하얀색
 			DamageText->SetDamageColor(FLinearColor::White);
 		}
 
 		DamageText->SetDamageText(DamageAmount);
 	}
 }
+
 void ASPlayerController::Server_RequestCharacterSwap_Implementation(int32 NewIndex)
 {
 	ASPlayerState* PS = GetPlayerState<ASPlayerState>();
 	APlayerCharacter* OldCharacter = Cast<APlayerCharacter>(GetPawn());
 	if (!PS || !OldCharacter || !PS->PlayerData.IsValidIndex(NewIndex)) return;
 
-	UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
-	if (ASC)
+	USAbilitySystemComponent* SASC = Cast<USAbilitySystemComponent>(PS->GetAbilitySystemComponent());
+	if (SASC)
 	{
-		ASC->RemoveLooseGameplayTag(OldCharacter->CharacterTag);
-		ASC->ClearAllAbilities(); 
+		SASC->bStartupAbilitiesGiven = false; 
+
+		SASC->RemoveLooseGameplayTag(OldCharacter->CharacterTag);
+		SASC->ClearAllAbilities(); 
 	}
 
-	// 3. 위치/속도 백업
 	FTransform SpawnTransform = OldCharacter->GetActorTransform();
 	FVector OldVelocity = OldCharacter->GetVelocity();
 	
-	// 5. 교체 진행
 	UnPossess();
 	OldCharacter->Destroy();
 
@@ -98,12 +94,13 @@ void ASPlayerController::Server_RequestCharacterSwap_Implementation(int32 NewInd
 
 	if (NewCharacter)
 	{
-		NewCharacter->CharacterTag = PS->PlayerData[NewIndex]->CharacterInfo.CharacterTag;
 		PS->CurrentCharacterIndex = NewIndex;
-		PS->CurrentCharacterTag = NewCharacter->CharacterTag;
+		PS->CurrentCharacterTag = PS->PlayerData[NewIndex]->CharacterInfo.CharacterTag;
+		NewCharacter->CharacterTag = PS->CurrentCharacterTag;
 
 		Possess(NewCharacter);
-
+		
+		NewCharacter->InitAbilityActorInfo();
 
 		if (NewCharacter->GetCharacterMovement())
 		{

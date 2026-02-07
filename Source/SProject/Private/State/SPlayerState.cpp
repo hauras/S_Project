@@ -38,3 +38,8 @@ void ASPlayerState::OnRep_CurrentCharacterTag(FGameplayTag OldTag)
 {
 }
 
+void ASPlayerState::OnRep_CurrentCharacterIndex(int32 OldIndex)
+{
+	OnCharacterIndexChangedDelegate.Broadcast(CurrentCharacterIndex);
+}
+
