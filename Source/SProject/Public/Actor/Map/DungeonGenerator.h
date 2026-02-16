@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "DungeonGenerator.generated.h"
 
+class UBoxComponent;
 // [추가] 레벨 스트리밍 클래스 전방 선언
 class ULevelStreamingDynamic;
 
@@ -68,10 +69,18 @@ protected:
 
 	UPROPERTY()
 	TMap<FIntPoint, FRoomData> RoomMap;
-
 	
 	UPROPERTY(EditAnywhere, Category = "Dungeon Settings")
 	float TreasureRoomRatio = 0.3f;
+
+	virtual void Tick(float DeltaTime) override;
+
+	// 지난 프레임에 플레이어가 있던 방 좌표 (중복 계산 방지)
+	FIntPoint LastPlayerGridPos = FIntPoint(-999, -999);
+
+	// 최적화 실행 함수
+	void UpdateRoomVisibility(FIntPoint CurrentGridPos);
+
 
 	void AssignSpecialRooms();
 	// [추가] 레벨 로딩이 완료(Shown)되었을 때 엔진이 자동으로 호출해줄 함수
