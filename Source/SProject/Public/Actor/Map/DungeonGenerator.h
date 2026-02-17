@@ -47,6 +47,12 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY()
+	TMap<FIntPoint, class ARoomBase*> RuntimeRoomMap;
+
+	// 특정 방이 클리어되었을 때 주변 방들에게 문을 열라고 시키는 함수
+	void NotifyNeighborDoors(FIntPoint ClearedCoords, int32 Bitmask);
+	
 protected:
 	virtual void BeginPlay() override;
 	

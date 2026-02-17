@@ -1,4 +1,6 @@
 #include "Actor/Map/DungeonGenerator.h"
+
+#include "Actor/Map/RoomBase.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/LevelStreamingDynamic.h"
 
@@ -13,6 +15,30 @@ void ADungeonGenerator::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ADungeonGenerator, DungeonLayout);
+}
+
+void ADungeonGenerator::NotifyNeighborDoors(FIntPoint ClearedCoords, int32 Bitmask)
+{
+	const FIntPoint Dirs[] = { FIntPoint(0,1), FIntPoint(0,-1), FIntPoint(-1,0), FIntPoint(1,0) };
+
+	// 1. 현재 방 문 열기
+	if (RuntimeRoomMap.Contains(ClearedCoords))
+		RuntimeRoomMap[ClearedCoords]->OpenDoors();
+
+	// 2. 연결된 이웃 방들 찾아서 문 열기
+	for (int32 i = 0; i < 4; ++i)
+	{
+		if (Bitmask & (1 << i)) // 이 방향에 길이 있다면
+		{
+			FIntPoint NeighborPos = ClearedCoords + Dirs[i];
+			if (RuntimeRoomMap.Contains(NeighborPos))
+			{
+				// 옆 방에게도 "문 열어!" 라고 시킴
+				// 옆 방의 OpenDoors는 자기 비트마스크를 체크해서 나랑 마주보는 문을 정확히 열게 됨
+				RuntimeRoomMap[NeighborPos]->OpenDoors();
+			}
+		}
+	}
 }
 
 void ADungeonGenerator::BeginPlay()
@@ -97,8 +123,6 @@ void ADungeonGenerator::Tick(float DeltaTime)
 
 void ADungeonGenerator::UpdateRoomVisibility(FIntPoint CurrentGridPos)
 {
-	// [수정] LevelDataMap (또는 LevelBitmaskMap) 순회
-	// 헤더에 정의하신 이름이 LevelBitmaskMap이라면 맞춰서 사용하세요.
 	for (auto& Pair : LevelDataMap) 
 	{
 		ULevelStreamingDynamic* LevelInstance = Pair.Key;
@@ -198,19 +222,32 @@ void ADungeonGenerator::OnRoomLevelShown()
 		if (StreamingLevel && StreamingLevel->IsLevelLoaded() && StreamingLevel->GetLoadedLevel())
 		{
 			ULevel* LoadedLevel = StreamingLevel->GetLoadedLevel();
+			ARoomBase* Room = nullptr;
 			
 			for (AActor* Actor : LoadedLevel->Actors)
 			{
 				if (!Actor) continue;
 
-				if ((Data.DoorBitmask & 1) && Actor->ActorHasTag(FName("NorthGate"))) Actor->Destroy();
-				if ((Data.DoorBitmask & 2) && Actor->ActorHasTag(FName("SouthGate"))) Actor->Destroy();
-				if ((Data.DoorBitmask & 4) && Actor->ActorHasTag(FName("WestGate"))) Actor->Destroy();
-				if ((Data.DoorBitmask & 8) && Actor->ActorHasTag(FName("EastGate"))) Actor->Destroy();
-
+				if (Actor->IsA(ARoomBase::StaticClass()))
+				{
+					Room = Cast<ARoomBase>(Actor);
+				}
+				
 				if (Data.RoomType != ERoomType::Treasure && Actor->ActorHasTag(FName("TreasureContent"))) Actor->Destroy();
 				if (Data.RoomType != ERoomType::Boss && Actor->ActorHasTag(FName("BossContent"))) Actor->Destroy();
 			}
+			
+			if (Room)
+			{
+				// [추가] 1. 이 방이 어디 좌표인지 알려줍니다.
+				Room->MyGridLocation = Data.GridLocation; 
+				Room->SetRoomData(Data.DoorBitmask);
+
+				// [추가] 2. 주소록(RuntimeRoomMap)에 이 방을 등록합니다.
+				// 그래야 나중에 옆방에서 "너도 문 열어!"라고 할 때 찾을 수 있습니다.
+				RuntimeRoomMap.Add(Data.GridLocation, Room); 
+			}
+			It.RemoveCurrent();
 		}
 	}
 }

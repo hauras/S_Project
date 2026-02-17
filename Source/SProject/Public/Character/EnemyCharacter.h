@@ -8,6 +8,7 @@
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "EnemyCharacter.generated.h"
 
+class ARoomBase;
 class ASAIController;
 class UWidgetComponent;
 class UBehaviorTree;
@@ -45,6 +46,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Combat")
 	TObjectPtr<AActor> CombatTarget;
 
+	UPROPERTY()
+	TObjectPtr<ARoomBase> MyRoom;
 protected:
 	virtual void BeginPlay() override;
 

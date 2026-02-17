@@ -4,9 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "RoomBase.generated.h"
 
-// 컴포넌트들을 미리 알려주는 전방 선언 (컴파일 속도 향상)
-class UStaticMeshComponent;
-class USceneComponent;
+class UBoxComponent;
 
 UCLASS()
 class SPROJECT_API ARoomBase : public AActor
@@ -15,38 +13,40 @@ class SPROJECT_API ARoomBase : public AActor
 	
 public:	
 	ARoomBase();
+
+	void SetRoomData(int32 InBitmask) { MyDoorBitmask = InBitmask; }
+
+	// 나중에 문을 여는 로직
+	void OpenDoors();
+
+	void EnemyDied();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Data")
+	FIntPoint MyGridLocation;
 	
-	UFUNCTION(BlueprintCallable, Category = "Dungeon|Logic")
-	void SetRoomConfiguration(int32 InBitmask);
-
 protected:
-	// --- 컴포넌트 구성 ---
 
-	// 액터의 기준점이 될 Root
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<USceneComponent> SceneRoot;
+	virtual void BeginPlay() override;
 
-	// 바닥 메쉬
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> FloorMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Logic")
+	TObjectPtr<UBoxComponent> TriggerBox;
 
-	// 4방향 벽 메쉬 (비트마스크 결과에 따라 제어됨)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> Wall_North; // Bit 1
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Data")
+	int32 MyDoorBitmask = 0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> Wall_South; // Bit 2
+	// 3. 캐릭터가 들어왔을 때 실행될 함수
+	UFUNCTION()
+	void OnPlayerEntered(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> Wall_West;  // Bit 4
+	UPROPERTY(EditAnywhere, Category = "Room")
+	TSubclassOf<APawn> MeleeMonster;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> Wall_East;  // Bit 8
+	UPROPERTY(EditAnywhere, Category = "Room")
+	TSubclassOf<APawn> RangedMonster;
 
-	// --- 데이터 ---
+	int32 MonsterCount = 0;
 
-	// 현재 방의 연결 상태를 저장 (디버깅용)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dungeon|Data")
-	int32 DoorBitmask;
+	void SpawnEnemy();
 
+	void CloseAllGates();
 };

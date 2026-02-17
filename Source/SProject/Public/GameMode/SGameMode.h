@@ -18,7 +18,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = " Enemy Info")
 	TObjectPtr<UEnemyStats> EnemyInfo;
 
-	void OnEnemyKilled();
 
 protected:
 

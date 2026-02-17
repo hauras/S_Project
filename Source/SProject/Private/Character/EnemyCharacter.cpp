@@ -11,9 +11,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/SUserWidgetBase.h"
-#include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BlackboardComponent.h"
-#include "GameMode/SGameMode.h"
+#include "Actor/Map/RoomBase.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -155,10 +153,11 @@ void AEnemyCharacter::Die()
 
 	if (HasAuthority())
 	{
-		ASGameMode* GameMode = GetWorld()->GetAuthGameMode<ASGameMode>();
-		if (GameMode)
+		// 1. [기존] 게임모드에 알리는 로직은 필요하다면 남겨두되 (점수용)
+		// 2. [추가] 나를 만든 방에게 죽었다고 확실히 보고합니다.
+		if (MyRoom)
 		{
-			GameMode->OnEnemyKilled();
+			MyRoom->EnemyDied();
 		}
 	}
 	
@@ -174,8 +173,3 @@ AActor* AEnemyCharacter::GetCombatTarget_Implementation() const
 	return CombatTarget;
 }
 
-/*bool AEnemyCharacter::IsBoss_Implementation() const
-{
-	return EnemyType == EEnemyType::Boss;
-}
-*/
