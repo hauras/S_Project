@@ -23,16 +23,16 @@ struct FRoomData
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	FIntPoint GridLocation;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	int32 DoorBitmask = 0;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	int32 Depth = 0;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	ERoomType RoomType = ERoomType::Normal;
 };
 
@@ -52,11 +52,16 @@ public:
 
 	// 특정 방이 클리어되었을 때 주변 방들에게 문을 열라고 시키는 함수
 	void NotifyNeighborDoors(FIntPoint ClearedCoords, int32 Bitmask);
+
+	FORCEINLINE const TArray<FRoomData>& GetDungeonLayout() const { return DungeonLayout; }
+
+	UFUNCTION(BlueprintPure, Category = "Dungeon")
+	FIntPoint GetGridCoordsFromWorldLocation(FVector WorldLocation) const;
 	
 protected:
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(ReplicatedUsing = OnRep_DungeonLayout)
+    UPROPERTY(ReplicatedUsing = OnRep_DungeonLayout, BlueprintReadOnly, Category = "Dungeon")
 	TArray<FRoomData> DungeonLayout;
 
 	UPROPERTY(EditAnywhere, Category = "Dungeon Settings")

@@ -14,6 +14,7 @@ class SPROJECT_API ARoomBase : public AActor
 public:	
 	ARoomBase();
 
+	
 	void SetRoomData(int32 InBitmask) { MyDoorBitmask = InBitmask; }
 
 	// 나중에 문을 여는 로직
@@ -23,6 +24,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Data")
 	FIntPoint MyGridLocation;
+	
 	
 protected:
 

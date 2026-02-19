@@ -41,6 +41,14 @@ void ADungeonGenerator::NotifyNeighborDoors(FIntPoint ClearedCoords, int32 Bitma
 	}
 }
 
+FIntPoint ADungeonGenerator::GetGridCoordsFromWorldLocation(FVector WorldLocation) const
+{
+	int32 GridX = FMath::RoundToInt(WorldLocation.X / RoomSize);
+	int32 GridY = FMath::RoundToInt(WorldLocation.Y / RoomSize);
+
+	return FIntPoint(GridX, GridY);
+}
+
 void ADungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
@@ -104,15 +112,11 @@ void ADungeonGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 로컬 플레이어 컨트롤러를 가져옴 (클라이언트/서버 각자 자신의 화면 최적화)
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!PC || !PC->GetPawn()) return;
 
-	FVector PlayerLoc = PC->GetPawn()->GetActorLocation();
-
-	int32 GridX = FMath::RoundToInt(PlayerLoc.X / RoomSize);
-	int32 GridY = FMath::RoundToInt(PlayerLoc.Y / RoomSize);
-	FIntPoint CurrentGridPos(GridX, GridY);
+	// 함수를 사용하여 현재 플레이어의 그리드 위치를 한 줄로 가져옴
+	FIntPoint CurrentGridPos = GetGridCoordsFromWorldLocation(PC->GetPawn()->GetActorLocation());
 
 	if (CurrentGridPos != LastPlayerGridPos)
 	{
@@ -214,12 +218,15 @@ void ADungeonGenerator::SpawnDungeon()
 
 void ADungeonGenerator::OnRoomLevelShown()
 {
+	// 델리게이트에 의해 호출될 때마다 전체 장부를 검사합니다.
 	for (auto It = LevelDataMap.CreateIterator(); It; ++It)
 	{
 		ULevelStreamingDynamic* StreamingLevel = It.Key();
 		FRoomData& Data = It.Value();
 
-		if (StreamingLevel && StreamingLevel->IsLevelLoaded() && StreamingLevel->GetLoadedLevel())
+		// 로딩이 완료되었고, 아직 '문 지우기' 처리를 안 한 레벨만 골라냅니다.
+		// (Data.Depth를 -1로 만드는 식으로 처리 완료 표시를 할 수 있습니다.)
+		if (StreamingLevel && StreamingLevel->IsLevelLoaded() && StreamingLevel->GetLoadedLevel() && Data.Depth != -999)
 		{
 			ULevel* LoadedLevel = StreamingLevel->GetLoadedLevel();
 			ARoomBase* Room = nullptr;
@@ -233,21 +240,22 @@ void ADungeonGenerator::OnRoomLevelShown()
 					Room = Cast<ARoomBase>(Actor);
 				}
 				
+				// 콘텐츠 필터링 (보물상자, 보스장식 등)
 				if (Data.RoomType != ERoomType::Treasure && Actor->ActorHasTag(FName("TreasureContent"))) Actor->Destroy();
 				if (Data.RoomType != ERoomType::Boss && Actor->ActorHasTag(FName("BossContent"))) Actor->Destroy();
 			}
 			
 			if (Room)
 			{
-				// [추가] 1. 이 방이 어디 좌표인지 알려줍니다.
 				Room->MyGridLocation = Data.GridLocation; 
 				Room->SetRoomData(Data.DoorBitmask);
-
-				// [추가] 2. 주소록(RuntimeRoomMap)에 이 방을 등록합니다.
-				// 그래야 나중에 옆방에서 "너도 문 열어!"라고 할 때 찾을 수 있습니다.
 				RuntimeRoomMap.Add(Data.GridLocation, Room); 
+
+				// [수정] 처리가 끝났음을 표시 (데이터를 삭제하지 않음!)
+				Data.Depth = -999; 
 			}
-			It.RemoveCurrent();
+
+			// It.RemoveCurrent(); // <--- [삭제] 절대 지우면 안 됩니다!
 		}
 	}
 }
