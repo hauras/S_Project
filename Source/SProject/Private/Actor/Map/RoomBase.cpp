@@ -1,27 +1,24 @@
 #include "Actor/Map/RoomBase.h"
-
 #include "Actor/Map/DungeonGenerator.h"
 #include "Components/BoxComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Components/SceneComponent.h"
-#include "Character/EnemyCharacter.h" // 몬스터 클래스 포함 필수
+#include "Character/EnemyCharacter.h"
 #include "Kismet/GameplayStatics.h"
+
+// =============================================================================
+// 1. 생성자 및 초기화 (Lifecycle)
+// =============================================================================
 
 ARoomBase::ARoomBase()
 {
+	PrimaryActorTick.bCanEverTick = false;
+
 	USceneComponent* SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	SetRootComponent(SceneRoot);
 
-	// 2. 트리거 박스 생성 및 부착
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>("TriggerBox");
 	TriggerBox->SetupAttachment(SceneRoot);
-    
-	// 3. 트리거 크기 설정 (예: 4400방 기준이면 절반인 2200 정도로 넉넉하게)
 	TriggerBox->SetBoxExtent(FVector(2000.f, 2000.f, 500.f));
-
-	// 4. 충돌 설정: 오직 겹침(Overlap)만 허용하고, 플레이어만 감지하도록 설정
 	TriggerBox->SetCollisionProfileName(TEXT("Trigger"));
-	
 }
 
 void ARoomBase::BeginPlay()
@@ -34,20 +31,115 @@ void ARoomBase::BeginPlay()
 	}
 }
 
+// [중요] 생성기에서 로드가 완료된 후 딱 한 번 호출됨
+void ARoomBase::CacheInternalActors()
+{
+	ULevel* MyLevel = GetLevel();
+	if (!MyLevel) return;
+
+	for (AActor* Actor : MyLevel->Actors)
+	{
+		if (!Actor) continue;
+
+		// 문 캐싱
+		if (Actor->ActorHasTag(FName("NorthGate"))) NorthGates.Add(Actor);
+		else if (Actor->ActorHasTag(FName("SouthGate"))) SouthGates.Add(Actor);
+		else if (Actor->ActorHasTag(FName("EastGate")))  EastGates.Add(Actor);
+		else if (Actor->ActorHasTag(FName("WestGate")))  WestGates.Add(Actor);
+
+		// 스폰 지점 캐싱
+		else if (Actor->ActorHasTag(FName("MeleePoint")))  MeleePoints.Add(Actor);
+		else if (Actor->ActorHasTag(FName("RangedPoint"))) RangedPoints.Add(Actor);
+	}
+}
+
+// =============================================================================
+// 2. 플레이어 진입 및 전투 시작 (Combat Start)
+// =============================================================================
+
 void ARoomBase::OnPlayerEntered(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!HasAuthority()) return;
 	
+	// 플레이어(Pawn)가 들어왔을 때만 실행
 	if (OtherActor && OtherActor->IsA(APawn::StaticClass()))
 	{
+		// 트리거는 한 번만 작동하도록 끔
 		TriggerBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		UE_LOG(LogTemp, Warning, TEXT("Combat Started in Room!"));
+		
+		UE_LOG(LogTemp, Warning, TEXT("Room [%s]: Player Entered!"), *MyGridLocation.ToString());
 
-		CloseAllGates(); 
+		CloseAllGates(); // 1. 문 닫기
+		SpawnEnemy();    // 2. 적 소환
+	}
+}
 
-		SpawnEnemy(); 
+void ARoomBase::CloseAllGates()
+{
+	// 모든 방향의 문 리스트를 하나로 합쳐서 한 번에 닫음
+	TArray<TArray<AActor*>*> AllGateLists = { &NorthGates, &SouthGates, &EastGates, &WestGates };
 
+	for (TArray<AActor*>* GateList : AllGateLists)
+	{
+		for (AActor* Gate : *GateList)
+		{
+			if (Gate)
+			{
+				Gate->SetActorHiddenInGame(false);
+				Gate->SetActorEnableCollision(true);
+			}
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Room Locked!"));
+}
+
+void ARoomBase::SpawnEnemy()
+{
+	MonsterCount = 0;
+
+	// [최적화] 전체 액터 순회 대신 미리 찾아둔 포인트 배열만 사용
+	auto SpawnLogic = [&](TArray<AActor*>& Points, TSubclassOf<APawn> ClassToSpawn) {
+		for (AActor* Point : Points)
+		{
+			if (!Point) continue;
+			
+			AEnemyCharacter* NewMonster = GetWorld()->SpawnActor<AEnemyCharacter>(
+				ClassToSpawn, Point->GetActorLocation(), Point->GetActorRotation()
+			);
+
+			if (NewMonster)
+			{
+				MonsterCount++;
+				NewMonster->MyRoom = this;
+			}
+		}
+	};
+
+	SpawnLogic(MeleePoints, MeleeMonster);
+	SpawnLogic(RangedPoints, RangedMonster);
+	
+	// 소환된 적이 없으면 즉시 문을 열어줌
+	if (MonsterCount <= 0)
+	{
+		OpenDoors();
+	}
+}
+
+// 3. 전투 종료 및 문 열기 (Combat End)
+void ARoomBase::EnemyDied()
+{
+	MonsterCount--;
+
+	if (MonsterCount <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Room Cleared!"));
+		
+		// [최적화] GetActorOfClass 대신 저장해둔 MyGenerator 바로 사용
+		if (MyGenerator)
+		{
+			MyGenerator->NotifyNeighborDoors(MyGridLocation, MyDoorBitmask);
+		}
 	}
 }
 
@@ -55,101 +147,21 @@ void ARoomBase::OpenDoors()
 {
 	if (!HasAuthority()) return;
 
-	ULevel* MyLevel = GetLevel();
-	if (!MyLevel) return;
-
-	for (AActor* Actor : MyLevel->Actors)
-	{
-		if (!Actor) continue;
-
-		// 비트마스크 상 '길이 있는 방향'의 문만 골라서 엽니다.
-		if (((MyDoorBitmask & 1) && Actor->ActorHasTag(FName("NorthGate"))) ||
-			((MyDoorBitmask & 2) && Actor->ActorHasTag(FName("SouthGate"))) ||
-			((MyDoorBitmask & 4) && Actor->ActorHasTag(FName("WestGate")))  ||
-			((MyDoorBitmask & 8) && Actor->ActorHasTag(FName("EastGate"))))
+	// 특정 방향 리스트의 문을 여는 헬퍼 함수
+	auto OpenGateList = [](TArray<AActor*>& GateList) {
+		for (AActor* Gate : GateList)
 		{
-			// [수정] Destroy 대신 숨기고 통과 가능하게 만듦
-			Actor->SetActorHiddenInGame(true);
-			Actor->SetActorEnableCollision(false);
+			if (Gate)
+			{
+				Gate->SetActorHiddenInGame(true);
+				Gate->SetActorEnableCollision(false);
+			}
 		}
-	}
-}
+	};
 
-
-void ARoomBase::SpawnEnemy()
-{
-	if (!HasAuthority()) return;
-
-	ULevel* MyLevel = GetLevel();
-	if (!MyLevel) return;
-
-	MonsterCount = 0; // 카운트 초기화
-
-	for (AActor* Actor : MyLevel->Actors)
-	{
-		if (!Actor) continue;
-
-		FVector SpawnLocation = Actor->GetActorLocation();
-		AEnemyCharacter* NewMonster = nullptr;
-
-		// 1. 근거리 포인트 체크
-		if (Actor->ActorHasTag(FName("MeleePoint")))
-		{
-			NewMonster = GetWorld()->SpawnActor<AEnemyCharacter>(MeleeMonster, SpawnLocation, FRotator::ZeroRotator);
-		}
-		// 2. 원거리 포인트 체크
-		else if (Actor->ActorHasTag(FName("RangedPoint")))
-		{
-			NewMonster = GetWorld()->SpawnActor<AEnemyCharacter>(RangedMonster, SpawnLocation, FRotator::ZeroRotator);
-		}
-
-		// 3. 스폰 성공 시 몬스터에게 방 정보 전달
-		if (NewMonster)
-		{
-			MonsterCount++;
-			NewMonster->MyRoom = this; // 몬스터에게 "니 주인은 나야"라고 알려줌
-		}
-	}
-	
-	// 만약 포인트는 있는데 몬스터가 하나도 스폰 안 됐다면 즉시 문을 열어줌 (예외 처리)
-	if (MonsterCount <= 0)
-	{
-		OpenDoors();
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Room at %s: Spawned %d Monsters"), *GetActorLocation().ToString(), MonsterCount);
-}
-
-void ARoomBase::CloseAllGates()
-{
-	if (!HasAuthority()) return;
-
-	ULevel* MyLevel = GetLevel();
-	for (AActor* Actor : MyLevel->Actors)
-	{
-		if (Actor && (Actor->ActorHasTag(FName("NorthGate")) || 
-					  Actor->ActorHasTag(FName("SouthGate")) || 
-					  Actor->ActorHasTag(FName("WestGate"))  || 
-					  Actor->ActorHasTag(FName("EastGate"))))
-		{
-			// 문을 보이게 하고 길을 막습니다. (닫힘)
-			Actor->SetActorHiddenInGame(false);
-			Actor->SetActorEnableCollision(true);
-		}
-	}
-	UE_LOG(LogTemp, Warning, TEXT("Room Locked! All gates closed."));
-}
-
-void ARoomBase::EnemyDied()
-{
-	MonsterCount--;
-	if (MonsterCount <= 0)
-	{
-		// 직접 OpenDoors를 부르는 대신, 생성기에게 보고해서 옆 방 문까지 같이 열게 합니다.
-		ADungeonGenerator* Generator = Cast<ADungeonGenerator>(UGameplayStatics::GetActorOfClass(GetWorld(), ADungeonGenerator::StaticClass()));
-		if (Generator)
-		{
-			Generator->NotifyNeighborDoors(MyGridLocation, MyDoorBitmask);
-		}
-	}
+	// 비트마스크를 체크하여 연결된 통로만 열기
+	if (MyDoorBitmask & 1) OpenGateList(NorthGates);
+	if (MyDoorBitmask & 2) OpenGateList(SouthGates);
+	if (MyDoorBitmask & 4) OpenGateList(WestGates);
+	if (MyDoorBitmask & 8) OpenGateList(EastGates);
 }

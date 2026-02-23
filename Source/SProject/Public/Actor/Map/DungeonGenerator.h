@@ -73,8 +73,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Dungeon Settings")
 	float RoomSize = 9000.f;
 
-	// [추가] 로딩 중인 레벨과 해당 방의 비트마스크를 매칭해두는 임시 장부
-	// 로딩이 끝나면 이 장부를 보고 "아, 이 레벨은 9번이었지!" 하고 문을 지웁니다.
 	UPROPERTY()
 	TMap<ULevelStreamingDynamic*, FRoomData> LevelDataMap;
 
@@ -92,7 +90,8 @@ protected:
 	// 최적화 실행 함수
 	void UpdateRoomVisibility(FIntPoint CurrentGridPos);
 
-
+	void InitializeRoom(ULevelStreamingDynamic* InStreamingLevel, FRoomData& Data);
+	
 	void AssignSpecialRooms();
 	// [추가] 레벨 로딩이 완료(Shown)되었을 때 엔진이 자동으로 호출해줄 함수
 	UFUNCTION()

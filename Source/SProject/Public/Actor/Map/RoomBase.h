@@ -5,6 +5,7 @@
 #include "RoomBase.generated.h"
 
 class UBoxComponent;
+class ADungeonGenerator; // 전방 선언 (DungeonGenerator가 있다는 걸 알림)
 
 UCLASS()
 class SPROJECT_API ARoomBase : public AActor
@@ -25,7 +26,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Data")
 	FIntPoint MyGridLocation;
 	
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Logic")
+	TObjectPtr<ADungeonGenerator> MyGenerator;
+
+	void CacheInternalActors();
 protected:
 
 	virtual void BeginPlay() override;
@@ -51,4 +55,19 @@ protected:
 	void SpawnEnemy();
 
 	void CloseAllGates();
+
+	UPROPERTY()
+	TArray<AActor*> NorthGates;
+	UPROPERTY()
+	TArray<AActor*> EastGates;
+	UPROPERTY()
+	TArray<AActor*> SouthGates;
+	UPROPERTY()
+	TArray<AActor*> WestGates;
+
+	UPROPERTY()
+	TArray<AActor*> MeleePoints;
+	UPROPERTY()
+	TArray<AActor*> RangedPoints;
+	
 };

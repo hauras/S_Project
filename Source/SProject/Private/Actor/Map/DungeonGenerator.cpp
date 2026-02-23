@@ -147,6 +147,7 @@ void ADungeonGenerator::UpdateRoomVisibility(FIntPoint CurrentGridPos)
 	}
 }
 
+
 void ADungeonGenerator::AssignSpecialRooms()
 {
 	FIntPoint BossCoords = FIntPoint(0, 0);
@@ -216,46 +217,53 @@ void ADungeonGenerator::SpawnDungeon()
 	}
 }
 
+void ADungeonGenerator::InitializeRoom(ULevelStreamingDynamic* InStreamingLevel, FRoomData& Data)
+{
+	if (!InStreamingLevel) return;
+
+	ULevel* LoadedLevel = InStreamingLevel->GetLoadedLevel(); // RoomLevel 대신 InStreamingLevel 사용
+	if (!LoadedLevel) return;
+
+	ARoomBase* Room = nullptr;
+
+	for (AActor* Actor : LoadedLevel->Actors)
+	{
+		if (!Actor) continue;
+
+		if (Actor->IsA(ARoomBase::StaticClass()))
+		{
+			Room = Cast<ARoomBase>(Actor);
+		}
+        
+		if (Data.RoomType != ERoomType::Treasure && Actor->ActorHasTag(FName("TreasureContent"))) Actor->Destroy();
+		else if (Data.RoomType != ERoomType::Boss && Actor->ActorHasTag(FName("BossContent"))) Actor->Destroy();
+	}
+
+	if (Room)
+	{
+		Room->MyGenerator = this; 
+		Room->MyGridLocation = Data.GridLocation; 
+		Room->SetRoomData(Data.DoorBitmask);
+		Room->CacheInternalActors(); 
+
+		RuntimeRoomMap.Add(Data.GridLocation, Room); 
+	}
+}
+
 void ADungeonGenerator::OnRoomLevelShown()
 {
-	// 델리게이트에 의해 호출될 때마다 전체 장부를 검사합니다.
 	for (auto It = LevelDataMap.CreateIterator(); It; ++It)
 	{
 		ULevelStreamingDynamic* StreamingLevel = It.Key();
 		FRoomData& Data = It.Value();
 
-		// 로딩이 완료되었고, 아직 '문 지우기' 처리를 안 한 레벨만 골라냅니다.
-		// (Data.Depth를 -1로 만드는 식으로 처리 완료 표시를 할 수 있습니다.)
-		if (StreamingLevel && StreamingLevel->IsLevelLoaded() && StreamingLevel->GetLoadedLevel() && Data.Depth != -999)
+		if (RuntimeRoomMap.Contains(Data.GridLocation)) continue;
+
+		if (StreamingLevel && StreamingLevel->IsLevelLoaded() && StreamingLevel->GetLoadedLevel())
 		{
-			ULevel* LoadedLevel = StreamingLevel->GetLoadedLevel();
-			ARoomBase* Room = nullptr;
-			
-			for (AActor* Actor : LoadedLevel->Actors)
-			{
-				if (!Actor) continue;
-
-				if (Actor->IsA(ARoomBase::StaticClass()))
-				{
-					Room = Cast<ARoomBase>(Actor);
-				}
-				
-				// 콘텐츠 필터링 (보물상자, 보스장식 등)
-				if (Data.RoomType != ERoomType::Treasure && Actor->ActorHasTag(FName("TreasureContent"))) Actor->Destroy();
-				if (Data.RoomType != ERoomType::Boss && Actor->ActorHasTag(FName("BossContent"))) Actor->Destroy();
-			}
-			
-			if (Room)
-			{
-				Room->MyGridLocation = Data.GridLocation; 
-				Room->SetRoomData(Data.DoorBitmask);
-				RuntimeRoomMap.Add(Data.GridLocation, Room); 
-
-				// [수정] 처리가 끝났음을 표시 (데이터를 삭제하지 않음!)
-				Data.Depth = -999; 
-			}
-
-			// It.RemoveCurrent(); // <--- [삭제] 절대 지우면 안 됩니다!
+			// 여기서 함수를 호출할 때 이름을 확인하세요.
+			InitializeRoom(StreamingLevel, Data);
+			return; 
 		}
 	}
 }
