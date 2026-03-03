@@ -7,7 +7,7 @@
 class UBoxComponent;
 // [추가] 레벨 스트리밍 클래스 전방 선언
 class ULevelStreamingDynamic;
-
+class ARoomBase;
 
 UENUM(BlueprintType)
 enum class ERoomType : uint8

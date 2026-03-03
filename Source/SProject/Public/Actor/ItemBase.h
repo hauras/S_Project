@@ -11,8 +11,7 @@ class UGameplayEffect;
 class USphereComponent;
 class UStaticMeshComponent;
 class UWidgetComponent;
-
-
+class ULootTable;
 
 UCLASS()
 class SPROJECT_API AItemBase : public AActor, public IInteractionInterface
@@ -25,6 +24,7 @@ public:
 	void Interact_Implementation(AActor* InInteractor);
 	void ShowInteractionWidget_Implementation() override;
 	void HideInteractionWidget_Implementation() override;
+	virtual void BeginPlay() override;
 protected:
 
 	UPROPERTY(VisibleAnywhere)
@@ -39,6 +39,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 	TArray<TObjectPtr<UItemDataAsset>> ItemInfo;
 
+	UPROPERTY(EditAnywhere, Category = "Loot")
+	TObjectPtr<class ULootTable> LootTableAsset;
+	
 	UPROPERTY()
 	bool bIsPickup = false;
 };

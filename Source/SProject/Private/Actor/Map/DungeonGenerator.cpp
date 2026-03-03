@@ -244,6 +244,9 @@ void ADungeonGenerator::InitializeRoom(ULevelStreamingDynamic* InStreamingLevel,
 		Room->MyGenerator = this; 
 		Room->MyGridLocation = Data.GridLocation; 
 		Room->SetRoomData(Data.DoorBitmask);
+
+		Room->SetRoomType(Data.RoomType);
+		
 		Room->CacheInternalActors(); 
 
 		RuntimeRoomMap.Add(Data.GridLocation, Room); 

@@ -50,6 +50,8 @@ void ARoomBase::CacheInternalActors()
 		// 스폰 지점 캐싱
 		else if (Actor->ActorHasTag(FName("MeleePoint")))  MeleePoints.Add(Actor);
 		else if (Actor->ActorHasTag(FName("RangedPoint"))) RangedPoints.Add(Actor);
+		else if (Actor->ActorHasTag(FName("BossPoint"))) BossPoints.Add(Actor);
+
 	}
 }
 
@@ -96,34 +98,45 @@ void ARoomBase::CloseAllGates()
 
 void ARoomBase::SpawnEnemy()
 {
+	if (!HasAuthority()) return;
 	MonsterCount = 0;
 
-	// [최적화] 전체 액터 순회 대신 미리 찾아둔 포인트 배열만 사용
-	auto SpawnLogic = [&](TArray<AActor*>& Points, TSubclassOf<APawn> ClassToSpawn) {
-		for (AActor* Point : Points)
+	// 1. 보스방인 경우
+	if (MyRoomType == ERoomType::Boss)
+	{
+		for (AActor* Point : BossPoints)
 		{
 			if (!Point) continue;
-			
-			AEnemyCharacter* NewMonster = GetWorld()->SpawnActor<AEnemyCharacter>(
-				ClassToSpawn, Point->GetActorLocation(), Point->GetActorRotation()
+			AEnemyCharacter* Boss = GetWorld()->SpawnActor<AEnemyCharacter>(
+				BossMonster, Point->GetActorLocation(), Point->GetActorRotation()
 			);
 
-			if (NewMonster)
+			if (Boss)
 			{
 				MonsterCount++;
-				NewMonster->MyRoom = this;
+				Boss->MyRoom = this; // 보스도 죽으면 EnemyDied를 호출해야 하므로 설정
 			}
 		}
-	};
-
-	SpawnLogic(MeleePoints, MeleeMonster);
-	SpawnLogic(RangedPoints, RangedMonster);
-	
-	// 소환된 적이 없으면 즉시 문을 열어줌
-	if (MonsterCount <= 0)
-	{
-		OpenDoors();
 	}
+	// 2. 일반 방인 경우 (기존 로직)
+	else
+	{
+		auto SpawnLogic = [&](TArray<AActor*>& Points, TSubclassOf<APawn> ClassToSpawn) {
+			for (AActor* Point : Points)
+			{
+				if (!Point) continue;
+				AEnemyCharacter* NewMonster = GetWorld()->SpawnActor<AEnemyCharacter>(
+					ClassToSpawn, Point->GetActorLocation(), Point->GetActorRotation()
+				);
+				if (NewMonster) { MonsterCount++; NewMonster->MyRoom = this; }
+			}
+		};
+
+		SpawnLogic(MeleePoints, MeleeMonster);
+		SpawnLogic(RangedPoints, RangedMonster);
+	}
+
+	if (MonsterCount <= 0) OpenDoors();
 }
 
 // 3. 전투 종료 및 문 열기 (Combat End)

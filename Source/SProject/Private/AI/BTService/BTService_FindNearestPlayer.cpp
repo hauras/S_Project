@@ -15,7 +15,7 @@ UBTService_FindNearestPlayer::UBTService_FindNearestPlayer()
 void UBTService_FindNearestPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-
+ 
 	APawn* OwningPawn = OwnerComp.GetAIOwner()->GetPawn();
 	if (OwningPawn == nullptr) return;
 
@@ -40,11 +40,9 @@ void UBTService_FindNearestPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, u
 		}
 	}
 
-	// 5. 블랙보드 컴포넌트를 가져옵니다.
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (BlackboardComp == nullptr) return;
 	
-	// ★★★ 여기가 블루프린트의 'Set Blackboard Value'에 해당합니다. ★★★
 	// 6. 에디터에서 연결한 Selector 변수를 사용하여 블랙보드에 값을 설정합니다.
 	BlackboardComp->SetValueAsObject(TargetToSelector.SelectedKeyName, ClosestActor);
 	BlackboardComp->SetValueAsFloat(DistanceToTargetSelector.SelectedKeyName, ClosestDistance);

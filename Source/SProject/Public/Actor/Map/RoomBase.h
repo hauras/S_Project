@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Actor/Map/DungeonGenerator.h"
 #include "RoomBase.generated.h"
 
 class UBoxComponent;
-class ADungeonGenerator; // 전방 선언 (DungeonGenerator가 있다는 걸 알림)
 
 UCLASS()
 class SPROJECT_API ARoomBase : public AActor
@@ -14,14 +14,12 @@ class SPROJECT_API ARoomBase : public AActor
 	
 public:	
 	ARoomBase();
-
 	
 	void SetRoomData(int32 InBitmask) { MyDoorBitmask = InBitmask; }
 
-	// 나중에 문을 여는 로직
 	void OpenDoors();
-
 	void EnemyDied();
+	void CacheInternalActors();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Data")
 	FIntPoint MyGridLocation;
@@ -29,7 +27,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Logic")
 	TObjectPtr<ADungeonGenerator> MyGenerator;
 
-	void CacheInternalActors();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Room|Data")
+	ERoomType MyRoomType;
+
+	void SetRoomType(ERoomType InType) { MyRoomType = InType; }
+	
 protected:
 
 	virtual void BeginPlay() override;
@@ -50,6 +52,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Room")
 	TSubclassOf<APawn> RangedMonster;
 
+	UPROPERTY(EditAnywhere, Category = "Room")
+	TSubclassOf<APawn> BossMonster;
+	
 	int32 MonsterCount = 0;
 
 	void SpawnEnemy();
@@ -69,5 +74,7 @@ protected:
 	TArray<AActor*> MeleePoints;
 	UPROPERTY()
 	TArray<AActor*> RangedPoints;
+	UPROPERTY()
+	TArray<AActor*> BossPoints;
 	
 };
