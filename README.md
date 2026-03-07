@@ -14,7 +14,7 @@
     <tr>
       <th>🎮 GAS 프로젝트 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 
-    </tr>
+  
   </thead>
 <tbody>
     <tr>
@@ -77,7 +77,7 @@
 * **도입 배경:** 멀티플레이 시 유저들의 동선이 과도하게 멀어지는 DFS(선형 구조)의 단점을 보완하기 위해, 시작점 기준 사방으로 밀집되어 퍼져나가는 BFS 알고리즘을 채택했습니다. [[📄방 생성 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Map/DungeonGenerator.cpp#L61-L109)
 * **Depth 기반 밸런싱:** 노드별 최단 거리(`Depth`)를 추적하여, 가장 먼 `Max Depth` 노드에 **보스 방**을 배치하고, 통로가 1개인 막다른 길(Dead End) 노드에 확률적으로 **보물 방**을 배치해 탐험의 서사를 수학적으로 제어했습니다.
 
-**2. 비트마스크(Bitmask)를 통한 네트워크 데이터 경량화**
+**2. 비트마스크(Bitmask)를 이용한 방 연결 및 데이터 경량화**
 * 방 4면의 문(Gate) 연결 상태를 `int32`의 단 **4비트(1:N, 2:S, 4:W, 8:E)** 로 압축했습니다. 
 * 이를 통해 멀티플레이어 환경에서 던전 레이아웃 데이터(`DungeonLayout`) 전체를 복제(Replication)할 때 발생하는 **네트워크 대역폭을 획기적으로 절약**했습니다.
 * 방 생성 단계에서 `OppositeIndex`를 통해 역방향 연결을 즉시 처리하여 고립된 방이 없는 경로 무결성을 보장했습니다.
