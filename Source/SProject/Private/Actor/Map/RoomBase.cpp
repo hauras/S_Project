@@ -4,10 +4,6 @@
 #include "Character/EnemyCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
-// =============================================================================
-// 1. 생성자 및 초기화 (Lifecycle)
-// =============================================================================
-
 ARoomBase::ARoomBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -31,7 +27,6 @@ void ARoomBase::BeginPlay()
 	}
 }
 
-// [중요] 생성기에서 로드가 완료된 후 딱 한 번 호출됨
 void ARoomBase::CacheInternalActors()
 {
 	ULevel* MyLevel = GetLevel();
@@ -55,10 +50,7 @@ void ARoomBase::CacheInternalActors()
 	}
 }
 
-// =============================================================================
-// 2. 플레이어 진입 및 전투 시작 (Combat Start)
-// =============================================================================
-
+// 2. 플레이어 진입 및 전투 시작 
 void ARoomBase::OnPlayerEntered(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -70,8 +62,6 @@ void ARoomBase::OnPlayerEntered(UPrimitiveComponent* OverlappedComp, AActor* Oth
 		// 트리거는 한 번만 작동하도록 끔
 		TriggerBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
-		UE_LOG(LogTemp, Warning, TEXT("Room [%s]: Player Entered!"), *MyGridLocation.ToString());
-
 		CloseAllGates(); // 1. 문 닫기
 		SpawnEnemy();    // 2. 적 소환
 	}
@@ -79,7 +69,6 @@ void ARoomBase::OnPlayerEntered(UPrimitiveComponent* OverlappedComp, AActor* Oth
 
 void ARoomBase::CloseAllGates()
 {
-	// 모든 방향의 문 리스트를 하나로 합쳐서 한 번에 닫음
 	TArray<TArray<AActor*>*> AllGateLists = { &NorthGates, &SouthGates, &EastGates, &WestGates };
 
 	for (TArray<AActor*>* GateList : AllGateLists)
@@ -93,7 +82,6 @@ void ARoomBase::CloseAllGates()
 			}
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Room Locked!"));
 }
 
 void ARoomBase::SpawnEnemy()

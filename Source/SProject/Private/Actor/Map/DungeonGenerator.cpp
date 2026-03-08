@@ -33,8 +33,6 @@ void ADungeonGenerator::NotifyNeighborDoors(FIntPoint ClearedCoords, int32 Bitma
 			FIntPoint NeighborPos = ClearedCoords + Dirs[i];
 			if (RuntimeRoomMap.Contains(NeighborPos))
 			{
-				// 옆 방에게도 "문 열어!" 라고 시킴
-				// 옆 방의 OpenDoors는 자기 비트마스크를 체크해서 나랑 마주보는 문을 정확히 열게 됨
 				RuntimeRoomMap[NeighborPos]->OpenDoors();
 			}
 		}
