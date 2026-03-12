@@ -96,7 +96,7 @@
 > * **추천 장면:** 올려주셨던 우측 상단 미니맵 UI가 잘 보이는 플레이 장면 (보스방, 보물방 위치가 잘 드러나는 사진)
 
 **1. 무작위 너비 우선 탐색(BFS)을 활용한 레벨 디자인**
-* **도입 배경:** 멀티플레이 시 유저들의 동선이 과도하게 멀어지는 DFS(선형 구조)의 단점을 보완하기 위해, 시작점 기준 사방으로 밀집되어 퍼져나가는 BFS 알고리즘을 채택했습니다. [[📄방 생성 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Map/DungeonGenerator.cpp#L61-L109)
+* **도입 배경:** 멀티플레이 시 유저들의 동선이 과도하게 멀어지는 DFS(선형 구조)의 단점을 보완하기 위해, 시작점 기준 사방으로 밀집되어 퍼져나가는 BFS 알고리즘을 채택했습니다. [[📄방 생성 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Map/DungeonGenerator.cpp#L59-L106)
 * **Depth 기반 밸런싱:** 노드별 최단 거리(`Depth`)를 추적하여, 가장 먼 `Max Depth` 방에 **보스 방**을, 막다른 길(Dead End)에 확률적으로 **보물 방**을 배치해 탐험의 서사를 제어했습니다.
 **2. 비트마스크(Bitmask)를 이용한 방 연결 및 데이터 경량화**
 * 방 4면의 문(Gate) 연결 상태를 `int32`의 단 **4비트(1:N, 2:S, 4:W, 8:E)** 로 압축하여 멀티플레이 환경의 네트워크 복제(Replication) 대역폭을 획기적으로 절약했습니다.
