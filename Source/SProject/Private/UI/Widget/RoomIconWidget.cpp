@@ -17,8 +17,20 @@ void URoomIconWidget::SetRoomTypeVisuals(ERoomType Type)
 		case ERoomType::Treasure: SelectedTexture = TreasureTexture; break;
 	}
 
+	// 시작 지점은 투명하게
+	if (Type == ERoomType::Start)
+	{
+		RoomImage->SetRenderOpacity(0.0f); 
+	}
+	else
+	{
+		RoomImage->SetRenderOpacity(1.0f); 
+	}
+	
 	if (SelectedTexture)
 	{
 		RoomImage->SetBrushFromTexture(SelectedTexture);
 	}
+
+	
 }

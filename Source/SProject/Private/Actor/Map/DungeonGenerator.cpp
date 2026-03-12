@@ -103,7 +103,6 @@ void ADungeonGenerator::GenerateDungeon()
 	AssignSpecialRooms();
 	SpawnDungeon();
 
-	UE_LOG(LogTemp, Warning, TEXT("Dungeon Generated! Total Rooms: %d"), DungeonLayout.Num());
 }
 
 void ADungeonGenerator::Tick(float DeltaTime)

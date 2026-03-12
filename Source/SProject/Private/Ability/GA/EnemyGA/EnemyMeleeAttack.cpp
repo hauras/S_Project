@@ -135,14 +135,12 @@ void UEnemyMeleeAttack::UpdateWarpTarget()
 	IEnemyInterface* EnemyInterface = Cast<IEnemyInterface>(AvatarActor);
 	if (EnemyInterface == nullptr) return;
 
-	// 최신 CombatTarget 정보를 가져옵니다.
 	AActor* CombatTarget = IEnemyInterface::Execute_GetCombatTarget(AvatarActor);
 	if (CombatTarget == nullptr) return;
 
 	ICombatInterface* CombatInterface_Owner = Cast<ICombatInterface>(AvatarActor);
 	if (CombatInterface_Owner == nullptr) return;
 
-	// 매 프레임마다 모션 워핑의 목표 지점을 최신 타겟 위치로 업데이트합니다.
 	CombatInterface_Owner->Execute_UpdateFacingTarget(AvatarActor, CombatTarget->GetActorLocation());
 }
 

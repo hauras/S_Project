@@ -46,6 +46,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Inventory")
 	TObjectPtr<UInventoryComponent> Inventory;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	bool bAttributesInitialized = false;
+	
 protected:
 	
 	UPROPERTY()

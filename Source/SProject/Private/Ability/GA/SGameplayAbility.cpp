@@ -16,13 +16,12 @@ void USGameplayAbility::ExecuteSynergyLogic(AActor* Target)
 
 	if (TargetASC && MyASC)
 	{
-		// 1. 상대방의 표식이 있는가?
+		// 1. 표식 확인
 		if (TargetASC->HasMatchingGameplayTag(MarkTag))
 		{
 			// 표식 제거
 			TargetASC->RemoveActiveEffectsWithGrantedTags(FGameplayTagContainer(MarkTag));
 
-			// [핵심] 컨텍스트 생성
 			FGameplayEffectContextHandle Context = MyASC->MakeEffectContext();
             
 			Context.AddInstigator(GetAvatarActorFromActorInfo(), GetAvatarActorFromActorInfo());

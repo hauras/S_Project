@@ -10,7 +10,6 @@
 
 void UMiniMap::UpdateMap()
 {
-	// RoomCanvas만 비웁니다. PlayerMarker가 있는 EntityCanvas는 건드리지 않습니다.
 	if (!MapCanvas || !RoomIconClass) return;
 	MapCanvas->ClearChildren();
 
@@ -24,10 +23,8 @@ void UMiniMap::UpdateMap()
 		URoomIconWidget* IconWidget = CreateWidget<URoomIconWidget>(GetWorld(), RoomIconClass);
 		if (IconWidget)
 		{
-			// 1. 캔버스에 추가 (반환된 슬롯을 바로 사용)
 			UCanvasPanelSlot* MapSlot = MapCanvas->AddChildToCanvas(IconWidget);
 			
-			// 2. 방 타입 비주얼 설정 (보스면 해골 등)
 			IconWidget->SetRoomTypeVisuals(Data.RoomType);
 
 			// 3. 위치 배치 (X*50, Y*-50)

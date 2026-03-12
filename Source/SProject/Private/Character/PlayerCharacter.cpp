@@ -37,28 +37,34 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	
+    
 	InitAbilityActorInfo(); 
 	AddCharacterAbilities();
 
 	USGameInstance* GI = Cast<USGameInstance>(GetGameInstance());
 	ASPlayerState* PS = GetPlayerState<ASPlayerState>();
-	
+    
 	if (GI && PS)
 	{
-		FString PlayerID = PS->GetPlayerName();
-		
-		if (GI->PlayerData.Contains(PlayerID) && GI->PlayerData[PlayerID].bIsDataValid)
+		if (!PS->bAttributesInitialized)
 		{
-			LoadProgressFromGameInstance();
-		}
-		else
-		{
-	
-			InitializeDefaultAttributes();
+			FString PlayerID = PS->GetPlayerName();
+          
+			if (GI->PlayerData.Contains(PlayerID) && GI->PlayerData[PlayerID].bIsDataValid)
+			{
+				LoadProgressFromGameInstance();
+			}
+			else
+			{
+				InitializeDefaultAttributes(); // 여기서 풀피가 되는 현상 방지!
+			}
+
+			// 초기화가 끝났으니 플래그를 true로 변경
+			PS->bAttributesInitialized = true;
 		}
 	}
 }
+
 void APlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
