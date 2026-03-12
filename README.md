@@ -123,12 +123,15 @@
 
 ### 🔄 [캐릭터 태그] GAS 기반 실시간 캐릭터 스왑 및 시너지 연계 <a name="character-tag-system"></a>
 플레이어가 여러 캐릭터를 실시간으로 교체(태그)하며 싸우는 시스템입니다. 교체 플레이 자체에 전략적 의미를 부여하기 위해 **'시너지 어택(Synergy Attack)'** 기능을 더했습니다.
+> <div align="center"> 
+  <i>"전사로 적에게 표식을 부여한 뒤, 마법사로 실시간 스왑하여 폭발 데미지 / 마법사로 표식 부여한 뒤 전사로 스왑하여 추가타 발생"</i> 
+</div>
 
-> **💡 [시너지 콤보 증명용 움짤 삽입 추천]**
-> * **추천 장면:** 적 머리 위에 '표식'이 생기고 태그 후 터지는 과정을 확실하게 보여주는 인게임 장면
+![SProject - Unreal Editor 2026-03-12 15-59-33](https://github.com/user-attachments/assets/fc98edba-1e68-43d6-a9d3-c1c01bbf62af)  ![SProject - Unreal Editor 2026-03-12 16-01-37](https://github.com/user-attachments/assets/e0778c49-58d9-4e2c-a27c-a8e5c8c9e757)
+
 
 **1. 조작감이 끊기지 않는 런타임 태그 시스템**
-* 이동 중에 태그해도 물리적 흐름이 끊기지 않도록, 이전 캐릭터의 이동 속도(Velocity)를 새로 생성된 캐릭터의 `CharacterMovement`에 그대로 넘겨주어 공중이나 질주 중에도 모멘텀이 이어지게 디테일을 살렸습니다. [[📄캐릭터 스왑 및 속도 유지 로직]](💡SPlayerController.cpp_스왑로직_링크_삽입)
+* 이동 중에 태그해도 물리적 흐름이 끊기지 않도록, 이전 캐릭터의 이동 속도(Velocity)를 새로 생성된 캐릭터의 `CharacterMovement`에 그대로 넘겨주어 공중이나 질주 중에도 모멘텀이 이어지게 디테일을 살렸습니다. [[📄캐릭터 스왑 및 속도 유지 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Controller/SPlayerController.cpp#L71-L110)
 
 **2. GAS 태그(Gameplay Tag)를 활용한 시너지 판정**
 * 전사와 마법사의 스킬 연계를 하드코딩으로 구현하지 않고, 언리얼 GAS의 **Gameplay Tag**를 적극 활용했습니다. [[📄시너지 표식 및 데미지 판정 로직]](💡SDamageExecution.cpp_또는_관련로직_링크_삽입)
