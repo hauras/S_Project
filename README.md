@@ -92,7 +92,12 @@
 ### 🏰 [던전 생성] BFS 기반 절차적 던전 생성 및 최적화 <a name="dungeon-generation"></a>
 멀티플레이어 환경에 맞춰 동적으로 로그라이크 맵을 생성하고, 대규모 맵에서도 메모리와 프레임을 방어할 수 있도록 구조적 최적화를 진행했습니다.
 
-> **💡 [미니맵 스크린샷 삽입 추천]**
+> ****
+> <img width="276" height="318" alt="image" src="https://github.com/user-attachments/assets/27940c70-544f-4265-b358-a26db1e98f69" />  <img width="238" height="184" alt="image" src="https://github.com/user-attachments/assets/91fd0230-8810-451b-ae8e-40ce18b886b1" />  <img width="379" height="382" alt="image" src="https://github.com/user-attachments/assets/2e07fc2a-3af7-4046-a827-928a4c8d2afb" />
+
+
+
+
 > * **추천 장면:** 올려주셨던 우측 상단 미니맵 UI가 잘 보이는 플레이 장면 (보스방, 보물방 위치가 잘 드러나는 사진)
 
 **1. 무작위 너비 우선 탐색(BFS)을 활용한 레벨 디자인**
