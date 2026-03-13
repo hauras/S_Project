@@ -129,7 +129,6 @@
 
 ![SProject - Unreal Editor 2026-03-12 15-59-33](https://github.com/user-attachments/assets/fc98edba-1e68-43d6-a9d3-c1c01bbf62af)  ![SProject - Unreal Editor 2026-03-12 16-01-37](https://github.com/user-attachments/assets/e0778c49-58d9-4e2c-a27c-a8e5c8c9e757)
 
-
 **1. 조작감이 끊기지 않는 런타임 태그 시스템**
 * 이동 중에 태그해도 물리적 흐름이 끊기지 않도록, 이전 캐릭터의 이동 속도(Velocity)를 새로 생성된 캐릭터의 `CharacterMovement`에 그대로 넘겨주어 공중이나 질주 중에도 모멘텀이 이어지게 디테일을 살렸습니다. [[📄캐릭터 스왑 및 속도 유지 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Controller/SPlayerController.cpp#L71-L110)
 
@@ -152,21 +151,22 @@
 <br>
 
 ### 🎒 [인벤토리 및 장비] GAS 연동 데이터 기반 아이템 시스템 <a name="inventory-system"></a>
-아이템의 획득, 보관, 사용 과정을 관리하며 특히 장비 장착 시 캐릭터의 스탯(Attribute)이 실시간으로 안전하게 반영되도록 설계했습니다.
+아이템 상자 생성부터 인벤토리 보관, 장비 장착 시 스탯 반영까지 이어지는 전체 사이클을 서버 권위와 데이터 기반 아키텍처로 구축했습니다.
 
 > **💡 [인벤토리 조작 움짤 삽입 추천]**
 > * **추천 장면:** 상자를 열어 아이템 획득 ➔ 인벤토리 창에서 장비 우클릭 ➔ 캐릭터 능력치 창의 스탯이 즉시 상승하는 장면
 
-**1. 인터페이스(Interface) 기반 상호작용 및 멀티플레이 동기화**
-* `IInteractionInterface`를 구현하여 상자, 드랍 아이템 등 다양한 액터와 플레이어 간의 통신 구조를 단일화했습니다. 
-* 모든 아이템 획득 및 사용 로직은 서버 권위(`Server_UseItem`)로 처리하여, 멀티플레이 환경에서 아이템 복사나 데이터 부정 조작을 원천 차단했습니다. [[📄아이템 동기화 로직]](💡InventoryComponent.cpp_링크_삽입)
+**1. 데이터 드리븐 가중치 상자 생성 (Server-Authoritative)**
+* `ULootTable` 에셋을 분리하여 기획자가 코드 수정 없이 확률을 제어하는 가중치 기반(Weighted Random) 드랍 시스템을 구현했습니다. 상자(`AItemBase`) 내부의 아이템 생성 연산은 오직 서버(`HasAuthority`)에서만 수행되어 클라이언트 변조를 원천 차단했습니다. [[📄가중치 드랍 로직]](💡ItemBase.cpp_링크_삽입)
 
-**2. ActiveGameplayEffectHandle을 활용한 무결성 장비 시스템**
-* 장비 장착 시 단순히 수치를 더하는 방식이 아니라, GAS의 **GameplayEffect(GE)**를 생성하여 적용합니다. 
-* 이때 반환된 `FActiveGameplayEffectHandle`을 슬롯별로 관리하여, 장비를 교체하거나 해제할 때 기존에 적용된 효과만 정확히 찾아 제거(`RemoveActiveGameplayEffect`)함으로써 스탯 계산의 무결성을 보장했습니다. [[📄GAS 기반 장비 장착 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Component/InventoryComponent.cpp#L80-L110)
+**2. 인터페이스(Interface) 기반 상호작용 및 RPC 통신**
+* `IInteractionInterface`를 통해 다양한 액터와 플레이어 간 통신 구조를 단일화했습니다. 획득(`Server_AddItem`) 및 사용(`Server_UseItem`) 로직 역시 서버 권위(RPC)로 처리하여 멀티플레이 데이터 부정 조작을 방지했습니다. [[📄아이템 RPC 통신 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Component/InventoryComponent.cpp#L20-L52)
 
-**3. 이벤트 주도형(Event-Driven) UI 업데이트**
-* `OnInventoryUpdated`, `OnEquipmentChanged` 등 멀티캐스트 델리게이트를 활용하여, 데이터가 변경될 때만 UI가 갱신되도록 설계해 연산 부하를 최소화했습니다.
+**3. ActiveGameplayEffectHandle을 활용한 무결성 장비 시스템**
+* 장비 장착 시 단순히 수치를 더하는 방식이 아니라, GAS의 **GameplayEffect(GE)**를 생성하여 적용합니다. 반환된 `FActiveGameplayEffectHandle`을 슬롯별로 관리하여, 장비 교체 시 기존에 적용된 효과만 정확히 찾아 제거(`RemoveActiveGameplayEffect`)함으로써 스탯 계산 오류를 방지했습니다. [[📄GAS 기반 장비 장착 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Component/InventoryComponent.cpp#L80-L110)
+
+**4. 이벤트 주도형(Event-Driven) UI 업데이트**
+* `OnInventoryUpdated`, `OnEquipmentChanged` 등 멀티캐스트 델리게이트를 활용하여, 데이터(TArray)가 변경될 때만 UI가 갱신되도록 설계해 매 프레임 발생하는 연산 부하를 최소화했습니다.
 
 <br>
 
