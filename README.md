@@ -1,6 +1,6 @@
 # 🗺️ 하정빈 포트폴리오
 > "프레임의 낭만, 끝까지 쫓다."
-> 
+> 
 > **C++, 언리얼 기반 게임 클라이언트 프로그래머.** <br>
 > 1 프레임의 성능 최적화를 위해 끝까지 파고드는 개발자 하정빈입니다. "동작하는 코드"를 넘어 "성능과 구조가 아름다운 코드"를 지향하며, 엔진 레벨의 깊이 있는 이해를 바탕으로 문제를 해결합니다.
 
@@ -9,27 +9,27 @@
 ## 목차<a name="table-of-contents"></a>
 
 <table>
-  <thead>
-    <tr>
-      <th>🎮 GAS 프로젝트 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-    </tr>
-  </thead>
+  <thead>
+    <tr>
+      <th>🎮 GAS 프로젝트 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+    </tr>
+  </thead>
 <tbody>
-    <tr>
-      <td valign="top">
-        <br>
-        <b><a href="#eternal-return-main">🎮 프로젝트 메인</a></b><br>
-        <b><a href="#game-overview">📖 게임 개요</a></b><br>
-        <b><a href="#learning-objectives">📌 학습 목표 및 달성</a></b><br>
-        <b><a href="#main-features">🔨 주요 개발</a></b><br>
-        <b><a href="#troubleshooting-eternal-return">🛠️ 문제 해결</a></b><br>
-        &nbsp;&nbsp; └ <a href="#deferred-rendering"> 레벨 전환 및 태그 시 상태 데이터 유실 이슈 </a><br>
-        &nbsp;&nbsp; └ <a href="#navmesh-optimization">"추후 추가"</a><br>
-        &nbsp;&nbsp; └ <a href="#quadtree-optimization">"추후 추가"</a><br>
-        &nbsp;&nbsp; └ <a href="#fsm-to-bt">"추후 추가"</a>
-      </td>
-      </tr>
-  </tbody>
+    <tr>
+      <td valign="top">
+        <br>
+        <b><a href="#eternal-return-main">🎮 프로젝트 메인</a></b><br>
+        <b><a href="#game-overview">📖 게임 개요</a></b><br>
+        <b><a href="#learning-objectives">📌 학습 목표 및 달성</a></b><br>
+        <b><a href="#main-features">🔨 주요 개발</a></b><br>
+        <b><a href="#troubleshooting-eternal-return">🛠️ 문제 해결</a></b><br>
+        &nbsp;&nbsp; └ <a href="#deferred-rendering"> 레벨 전환 및 태그 시 상태 데이터 유실 이슈 </a><br>
+        &nbsp;&nbsp; └ <a href="#inventory-sync"> 멀티플레이 장비 장착 시 스탯 동기화 이슈 </a><br>
+        &nbsp;&nbsp; └ <a href="#navmesh-optimization">"추후 추가"</a><br>
+        &nbsp;&nbsp; └ <a href="#quadtree-optimization">"추후 추가"</a><br>
+      </td>
+      </tr>
+  </tbody>
 </table>
 <br>
 <br>
@@ -61,7 +61,7 @@
 &nbsp;&nbsp; └ <a href="#dungeon-generation">던전 생성 (절차적 맵 생성 최적화)</a><br>
 &nbsp;&nbsp; └ <a href="#character-tag-system">캐릭터 태그 (실시간 스왑 및 시너지)</a><br>
 &nbsp;&nbsp; └ <a href="#combat-system">전투 시스템 (GAS 코어 아키텍처)</a><br>
-&nbsp;&nbsp; └ <a href="#multiplayer-sync">멀티플레이 (추후 추가)</a><br>
+&nbsp;&nbsp; └ <a href="#inventory-system">인벤토리 및 장비 (GAS 스탯 연동)</a><br>
 &nbsp;&nbsp; └ <a href="#monster-ai">몬스터 AI (추후 추가)</a>
 
 <br>
@@ -71,7 +71,7 @@
 ## 1. 📖 게임 개요 <a name="game-overview"></a>
 > **"절차적으로 생성되는 미지의 던전, 실시간 태그와 시너지로 돌파하라!"**
 
-언리얼 엔진의 **GAS(Gameplay Ability System)**를 심도 있게 활용하여 개발한 멀티플레이 액션 로그라이크 게임입니다. 플레이어는 전사와 마법사 등 다양한 클래스를 실시간으로 교체(태그)하며 전투를 벌입니다. 단순히 캐릭터를 바꾸는 것을 넘어, '전사로 표식을 남기고 마법사로 폭발시키는' 형태의 **'시너지 어택(Synergy Attack)'**을 통해 액션과 전략의 재미를 극대화했습니다. 
+언리얼 엔진의 **GAS(Gameplay Ability System)**를 심도 있게 활용하여 개발한 멀티플레이 액션 로그라이크 게임입니다. 플레이어는 전사와 마법사 등 다양한 클래스를 실시간으로 교체(태그)하며 전투를 벌입니다. 단순히 캐릭터를 바꾸는 것을 넘어, '전사로 표식을 남기고 마법사로 폭발시키는' 형태의 **'시너지 어택(Synergy Attack)'**을 통해 액션과 전략의 재미를 극대화했습니다. 
 
 > **💡 [최고의 하이라이트 움짤 1개 삽입 추천]**
 > * **추천 장면:** 전사로 대쉬 공격 ➔ 공중에서 마법사로 태그 ➔ 폭발 스킬 적중 (가장 화려하고 시스템이 잘 보이는 5초 내외 움짤)
@@ -83,7 +83,7 @@
 
 * **GAS 아키텍처의 완벽한 내재화:** 단순한 스킬 구현을 넘어 `ExecutionCalculation`을 활용한 복잡한 데미지 연산과 데이터 드리븐(Data-Driven) 전투 파이프라인을 성공적으로 구축했습니다.
 * **대규모 맵 환경의 메모리/프레임 최적화:** BFS 알고리즘과 비트마스크 연산을 결합해 로그라이크 맵을 생성하고, 동적 렌더링 컬링(`SetShouldBeVisible`)으로 멀티플레이 환경의 프레임 드랍을 완벽히 방어했습니다.
-* **안정적인 생명주기(Lifecycle) 및 네트워크 동기화:** 잦은 액터 파괴/생성 시 발생하는 데이터 유실 문제를 `PlayerState` 기반의 ASC 관리와 플래그 제어를 통해 원천 차단했습니다.
+* **안정적인 데이터 무결성 및 네트워크 동기화:** 잦은 액터 파괴/생성 시 발생하는 데이터 유실 문제를 `PlayerState` 이관으로 해결하고, 장비 장착 시의 스탯 계산을 `GameplayEffectHandle`로 통제하여 데이터의 무결성을 확보했습니다.
 
 <br>
 
@@ -151,14 +151,42 @@
 
 <br>
 
+### 🎒 [인벤토리 및 장비] GAS 연동 데이터 기반 아이템 시스템 <a name="inventory-system"></a>
+아이템의 획득, 보관, 사용 과정을 관리하며 특히 장비 장착 시 캐릭터의 스탯(Attribute)이 실시간으로 안전하게 반영되도록 설계했습니다.
+
+> **💡 [인벤토리 조작 움짤 삽입 추천]**
+> * **추천 장면:** 상자를 열어 아이템 획득 ➔ 인벤토리 창에서 장비 우클릭 ➔ 캐릭터 능력치 창의 스탯이 즉시 상승하는 장면
+
+**1. 인터페이스(Interface) 기반 상호작용 및 멀티플레이 동기화**
+* `IInteractionInterface`를 구현하여 상자, 드랍 아이템 등 다양한 액터와 플레이어 간의 통신 구조를 단일화했습니다. 
+* 모든 아이템 획득 및 사용 로직은 서버 권위(`Server_UseItem`)로 처리하여, 멀티플레이 환경에서 아이템 복사나 데이터 부정 조작을 원천 차단했습니다. [[📄아이템 동기화 로직]](💡InventoryComponent.cpp_링크_삽입)
+
+**2. ActiveGameplayEffectHandle을 활용한 무결성 장비 시스템**
+* 장비 장착 시 단순히 수치를 더하는 방식이 아니라, GAS의 **GameplayEffect(GE)**를 생성하여 적용합니다. 
+* 이때 반환된 `FActiveGameplayEffectHandle`을 슬롯별로 관리하여, 장비를 교체하거나 해제할 때 기존에 적용된 효과만 정확히 찾아 제거(`RemoveActiveGameplayEffect`)함으로써 스탯 계산의 무결성을 보장했습니다. [[📄GAS 기반 장비 장착 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Component/InventoryComponent.cpp#L80-L110)
+
+**3. 이벤트 주도형(Event-Driven) UI 업데이트**
+* `OnInventoryUpdated`, `OnEquipmentChanged` 등 멀티캐스트 델리게이트를 활용하여, 데이터가 변경될 때만 UI가 갱신되도록 설계해 연산 부하를 최소화했습니다.
+
+<br>
+
 ## 4. 🛠️ 문제 해결 (Troubleshooting) <a name="troubleshooting-eternal-return"></a>
 
 ### 1. 레벨 전환 및 태그 시 캐릭터 데이터 유실 및 동기화 이슈 해결 <a name="deferred-rendering"></a>
 * **🔴 문제 상황:** 실시간 캐릭터 태그 시 기존 캐릭터(Pawn) 액터를 파괴하고 새로 스폰하는 방식을 사용했는데, 이때 캐릭터가 지닌 체력 및 쿨타임 데이터가 날아가거나, 태그 직후 체력이 풀피로 가득 차버리는 버그가 발생했습니다.
 * **🔍 원인 분석:** 1. `AbilitySystemComponent(ASC)`가 폰에 부착되어 있어, 폰 파괴 시 생명주기가 같이 끝나는 것이 첫 번째 원인이었습니다.
-  2. 스왑 후 새 캐릭터에 빙의될 때마다 `PossessedBy`가 재호출되며, `InitializeDefaultAttributes` 로직이 실행되어 어트리뷰트가 강제로 초기화되는 것이 두 번째 원인이었습니다.
+  2. 스왑 후 새 캐릭터에 빙의될 때마다 `PossessedBy`가 재호출되며, `InitializeDefaultAttributes` 로직이 실행되어 어트리뷰트가 강제로 초기화되는 것이 두 번째 원인이었습니다.
 * **🟢 해결 방법 (PlayerState 이관 및 Initialization Flag 적용):**
-  * ASC와 `AttributeSet`의 소유권(Owner)을 폰이 아닌 **PlayerState**로 이관하여, 폰의 파괴와 무관하게 데이터가 보존되도록 생명주기를 전면 분리했습니다. 
-  * `PlayerState` 내부에 `bAttributesInitialized` 플래그를 추가하여, 최초 접속 시에만 `GameInstance`에서 데이터를 로드해 초기화하고, 이후 캐릭터 태그 과정에서는 어트리뷰트 초기화 로직을 건너뛰도록 제어 흐름을 수정했습니다. [[📄교체 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Character/PlayerCharacter.cpp#L37-L61)
+  * ASC와 `AttributeSet`의 소유권(Owner)을 폰이 아닌 **PlayerState**로 이관하여, 폰의 파괴와 무관하게 데이터가 보존되도록 생명주기를 전면 분리했습니다. 
+  * `PlayerState` 내부에 `bAttributesInitialized` 플래그를 추가하여, 최초 접속 시에만 `GameInstance`에서 데이터를 로드해 초기화하고, 이후 캐릭터 태그 과정에서는 어트리뷰트 초기화 로직을 건너뛰도록 제어 흐름을 수정했습니다. [[📄교체 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Character/PlayerCharacter.cpp#L37-L61)
 
 * **✨ 결과:** 폰이 수시로 파괴되고 스폰되는 멀티플레이어 환경에서도 플레이어의 상태 데이터가 완벽하게 보존되며, 데이터 꼬임이나 의도치 않은 회복 현상을 원천 차단했습니다.
+
+### 2. 멀티플레이 장비 장착 시 스탯 동기화 및 무결성 이슈 해결 <a name="inventory-sync"></a>
+* **🔴 문제 상황:** 아이템을 장착하거나 해제할 때 캐릭터의 스탯이 즉시 갱신되지 않거나, 서버-클라이언트 간 통신 지연으로 인해 스탯이 비정상적으로 뻥튀기(중복 적용)되는 현상이 발생했습니다.
+* **🔍 원인 분석:** 기존의 단순 변수 가감 방식(스탯 += 아이템 공격력)은 네트워크 지연(Latency) 환경이나 잦은 장비 교체 시 해제 로직이 누락되어 데이터 오염에 매우 취약한 구조였습니다.
+* **🟢 해결 방법 (GE Handle 기반 설계):**
+  * 장비 장착 시 단순히 숫자를 더하는 대신 **`GameplayEffect`**를 적용하고, 반환된 **`FActiveGameplayEffectHandle`**을 `TMap`을 이용해 슬롯별로 안전하게 보관했습니다.
+  * 장비 교체 시, 보관해 둔 핸들을 사용하여 이전 효과를 서버 단에서 확정적으로 제거(`RemoveActiveGameplayEffect`)한 뒤 새로운 효과를 적용하도록 구조를 전면 개편했습니다. [[📄GE 핸들 관리 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Component/InventoryComponent.cpp#L80-L110)
+
+* **✨ 결과:** 어떠한 네트워크 핑(Ping) 상태에서도 장비 교체 시 기존 능력치가 정확히 회수되며, 스탯 수치의 100% 무결성을 보장하게 되었습니다.
