@@ -25,8 +25,7 @@
         <b><a href="#troubleshooting-eternal-return">🛠️ 문제 해결</a></b><br>
         &nbsp;&nbsp; └ <a href="#deferred-rendering"> 레벨 전환 및 태그 시 상태 데이터 유실 이슈 </a><br>
         &nbsp;&nbsp; └ <a href="#inventory-sync"> 멀티플레이 장비 장착 시 스탯 동기화 이슈 </a><br>
-        &nbsp;&nbsp; └ <a href="#navmesh-optimization">"추후 추가"</a><br>
-        &nbsp;&nbsp; └ <a href="#quadtree-optimization">"추후 추가"</a><br>
+        &nbsp;&nbsp; └ <a href="#boss-optimization"> 보스 페이즈 전환 연출 시 프레임 드랍 최적화 </a><br>
       </td>
       </tr>
   </tbody>
@@ -62,7 +61,7 @@
 &nbsp;&nbsp; └ <a href="#character-tag-system">캐릭터 태그 (실시간 스왑 및 시너지)</a><br>
 &nbsp;&nbsp; └ <a href="#combat-system">전투 시스템 (GAS 코어 아키텍처)</a><br>
 &nbsp;&nbsp; └ <a href="#inventory-system">인벤토리 및 장비 (GAS 스탯 연동)</a><br>
-&nbsp;&nbsp; └ <a href="#monster-ai">몬스터 AI (추후 추가)</a>
+&nbsp;&nbsp; └ <a href="#monster-ai">보스전 및 AI (이벤트 주도형 페이즈 제어)</a>
 
 <br>
 
@@ -96,6 +95,7 @@
   <img width="276" height="318" alt="image" src="https://github.com/user-attachments/assets/27940c70-544f-4265-b358-a26db1e98f69" />
   <img width="238" height="184" alt="image" src="https://github.com/user-attachments/assets/91fd0230-8810-451b-ae8e-40ce18b886b1" />
   <img width="379" height="382" alt="image" src="https://github.com/user-attachments/assets/2e07fc2a-3af7-4046-a827-928a4c8d2afb" />
+  
   <br>
   <i>"방 개수 조절을 통한 맵 확장성 및 프레임 드랍(렉) 방지를 위해 플레이어 인접 방만 실시간으로 렌더링하는 동적 시야(Dynamic Culling) 최적화 시스템"</i>
 </div>
@@ -144,7 +144,11 @@
 > **💡 [스킬 몽타주 움짤 삽입 추천]**
 > * **추천 장면:** 투사체 발사, 블랙홀, 회피, 빔 공격 등 직접 깎으신 여러 스킬들이 1~2초 간격으로 빠르게 전환되며 지나가는 스피디한 움짤 딱 1개
 
-**1. Base 클래스화를 통한 스킬 모듈화**
+**1. Native Gameplay Tags 기반의 중앙 집중형 데이터 관리**
+* 에디터에서 문자열을 직접 타이핑할 때 발생하는 휴먼 에러(Typo)를 원천 차단하기 위해, 모든 게임플레이 태그를 C++ 단계에서 `Native Gameplay Tag`로 초기화하고 구조체(`FSGameplayTags`)로 캐싱하여 중앙 집중화했습니다. [[📄Native Tag 캐싱 로직]](💡SGameplayTags.cpp_링크_삽입)
+* `Input`, `Event`, `State`, `Cooldown` 등 목적에 맞게 태그의 계층(Hierarchy)을 세분화하여 설계함으로써, 코드의 가독성을 높이고 런타임 검사 시 안전한 타입 체크를 보장했습니다.
+
+**2. Base 클래스화를 통한 스킬 모듈화**
 * `GA_AttackBase`, `GA_ProjectileBase` 등 스킬의 형태(근접, 투사체, 광역 등)에 따라 부모 클래스를 세분화하여 공통 로직(몽타주 재생, 타격 판정 등)을 캡슐화했습니다. [[📄스킬 Base 클래스 설계]](💡GA_AttackBase.h/cpp_링크_삽입)
 * 블루프린트에서는 부모 클래스를 상속받아 데이터만 할당하면 즉시 새로운 스킬이 완성되는 파이프라인을 구축했습니다.
 
@@ -153,11 +157,18 @@
 ### 🎒 [인벤토리 및 장비] GAS 연동 데이터 기반 아이템 시스템 <a name="inventory-system"></a>
 아이템 상자 생성부터 인벤토리 보관, 장비 장착 시 스탯 반영까지 이어지는 전체 사이클을 서버 권위와 데이터 기반 아키텍처로 구축했습니다.
 
-> **💡 [인벤토리 조작 움짤 삽입 추천]**
-> * **추천 장면:** 상자를 열어 아이템 획득 ➔ 인벤토리 창에서 장비 우클릭 ➔ 캐릭터 능력치 창의 스탯이 즉시 상승하는 장면
+> ** [인벤토리 조작]**
+
+![Image](https://github.com/user-attachments/assets/e1105b8e-3bfb-41bb-94b4-3aa6032ac29e)
 
 **1. 데이터 드리븐 가중치 상자 생성 (Server-Authoritative)**
-* `ULootTable` 에셋을 분리하여 기획자가 코드 수정 없이 확률을 제어하는 가중치 기반(Weighted Random) 드랍 시스템을 구현했습니다. 상자(`AItemBase`) 내부의 아이템 생성 연산은 오직 서버(`HasAuthority`)에서만 수행되어 클라이언트 변조를 원천 차단했습니다. [[📄가중치 드랍 로직]](💡ItemBase.cpp_링크_삽입)
+* `ULootTable` 에셋을 분리하여 기획자가 코드 수정 없이 확률을 제어하는 가중치 기반(Weighted Random) 드랍 시스템을 구현했습니다. 상자(`AItemBase`) 내부의 아이템 생성 연산은 오직 서버(`HasAuthority`)에서만 수행되어 클라이언트 변조를 원천 차단했습니다. [[📄가중치 드랍 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/ItemBase.cpp#L26-L45)
+
+<img width="1240" height="400" alt="Image" src="https://github.com/user-attachments/assets/165cab02-ffc0-462f-9aab-147906879259" />
+
+> ** [상자에 아이템이 랜덤으로 생성되어 있는 모습]**
+
+![Image](https://github.com/user-attachments/assets/b8f312c6-969c-48d8-a16c-13283f14148c)
 
 **2. 인터페이스(Interface) 기반 상호작용 및 RPC 통신**
 * `IInteractionInterface`를 통해 다양한 액터와 플레이어 간 통신 구조를 단일화했습니다. 획득(`Server_AddItem`) 및 사용(`Server_UseItem`) 로직 역시 서버 권위(RPC)로 처리하여 멀티플레이 데이터 부정 조작을 방지했습니다. [[📄아이템 RPC 통신 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Component/InventoryComponent.cpp#L20-L52)
@@ -165,8 +176,24 @@
 **3. ActiveGameplayEffectHandle을 활용한 무결성 장비 시스템**
 * 장비 장착 시 단순히 수치를 더하는 방식이 아니라, GAS의 **GameplayEffect(GE)**를 생성하여 적용합니다. 반환된 `FActiveGameplayEffectHandle`을 슬롯별로 관리하여, 장비 교체 시 기존에 적용된 효과만 정확히 찾아 제거(`RemoveActiveGameplayEffect`)함으로써 스탯 계산 오류를 방지했습니다. [[📄GAS 기반 장비 장착 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Component/InventoryComponent.cpp#L80-L110)
 
-**4. 이벤트 주도형(Event-Driven) UI 업데이트**
-* `OnInventoryUpdated`, `OnEquipmentChanged` 등 멀티캐스트 델리게이트를 활용하여, 데이터(TArray)가 변경될 때만 UI가 갱신되도록 설계해 매 프레임 발생하는 연산 부하를 최소화했습니다.
+<br>
+
+### 👾 [보스전 & AI] 이벤트 주도형 페이즈 제어 및 커스텀 AbilityTask <a name="monster-ai"></a>
+단순한 상태머신(FSM)을 넘어, GAS와 커스텀 노드를 활용해 보스의 패턴 변화와 상태 이상을 데이터 기반으로 제어했습니다.
+
+> **💡 [체력이 50%가 되면 몬스터를 소환하는 모습]**
+![Image](https://github.com/user-attachments/assets/ec6645ff-4a5b-4c01-bc77-e1b8d80723b8)
+
+**1. Ability Task 활용**
+* **이벤트 활용 통신:** 보스의 체력이 떨어졌을 때 소환 함수를 직접 호출하는 하드코딩을 배제하고, GAS의 **Gameplay Event**를 활용했습니다. 특정 태그가 발생했을 때만 소환 로직이 반응하도록 설계하여 모듈 간의 결합도를 낮췄습니다.
+* [[소환 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Ability/AbilityTask/AbilityTask_SpawnEnemy.cpp#L19-L64)
+* 소환될 몬스터 클래스는 `TSoftClassPtr`로 관리하여 이벤트 발생 시점에만 동적 로드(`LoadSynchronous`)하도록 설계해 메모리 상주를 최소화했습니다.
+
+**2. NavMesh 연동을 통한 안전한 좌표 탐색**
+* 몬스터가 맵 밖이나 벽 속에 스폰되는 버그를 방지하기 위해, `NavigationSystem`의 `GetRandomReachablePointInRadius` 알고리즘을 활용하여 보스 주변의 '도달 가능한 유효(Valid) 좌표'에만 스폰되도록 안정성을 확보했습니다.
+
+**3. 몽타주와 GAS가 연동된 상태 이상(Stun) 타격 판정**
+* 보스의 연속 공격 시 애니메이션 몽타주 노티파이(Notify)와 GAS를 연동했습니다. 타격 시점에 `GameplayEffect`를 통해 플레이어에게 스턴(Stun) 태그를 부여하여 조작을 제한하는 정교한 상태 이상 시스템을 구축했습니다.
 
 <br>
 
@@ -178,7 +205,7 @@
   2. 스왑 후 새 캐릭터에 빙의될 때마다 `PossessedBy`가 재호출되며, `InitializeDefaultAttributes` 로직이 실행되어 어트리뷰트가 강제로 초기화되는 것이 두 번째 원인이었습니다.
 * **🟢 해결 방법 (PlayerState 이관 및 Initialization Flag 적용):**
   * ASC와 `AttributeSet`의 소유권(Owner)을 폰이 아닌 **PlayerState**로 이관하여, 폰의 파괴와 무관하게 데이터가 보존되도록 생명주기를 전면 분리했습니다. 
-  * `PlayerState` 내부에 `bAttributesInitialized` 플래그를 추가하여, 최초 접속 시에만 `GameInstance`에서 데이터를 로드해 초기화하고, 이후 캐릭터 태그 과정에서는 어트리뷰트 초기화 로직을 건너뛰도록 제어 흐름을 수정했습니다. [[📄교체 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Character/PlayerCharacter.cpp#L37-L61)
+  * `PlayerState` 내부에 플래그를 추가하여, 최초 접속 시에만 `GameInstance`에서 데이터를 로드해 초기화하고, 이후 캐릭터 태그 과정에서는 어트리뷰트 초기화 로직을 건너뛰도록 제어 흐름을 수정했습니다. [[📄교체 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Character/PlayerCharacter.cpp#L37-L61)
 
 * **✨ 결과:** 폰이 수시로 파괴되고 스폰되는 멀티플레이어 환경에서도 플레이어의 상태 데이터가 완벽하게 보존되며, 데이터 꼬임이나 의도치 않은 회복 현상을 원천 차단했습니다.
 
@@ -190,3 +217,11 @@
   * 장비 교체 시, 보관해 둔 핸들을 사용하여 이전 효과를 서버 단에서 확정적으로 제거(`RemoveActiveGameplayEffect`)한 뒤 새로운 효과를 적용하도록 구조를 전면 개편했습니다. [[📄GE 핸들 관리 로직]](https://github.com/hauras/S_Project/blob/main/Source/SProject/Private/Actor/Component/InventoryComponent.cpp#L80-L110)
 
 * **✨ 결과:** 어떠한 네트워크 핑(Ping) 상태에서도 장비 교체 시 기존 능력치가 정확히 회수되며, 스탯 수치의 100% 무결성을 보장하게 되었습니다.
+
+### 3. 보스 페이즈 전환 및 연출 시 프레임 드랍 최적화 <a name="boss-optimization"></a>
+* **🔴 문제 상황:** 보스의 체력이 50% 이하로 떨어져 2페이즈로 진입할 때, 대량의 몬스터 스폰과 보스의 디졸브(Dissolve) 연출이 겹치면서 순간적으로 심한 렉(Frame Spike)이 발생했습니다.
+* **🔍 원인 분석:** 복잡한 머티리얼 파라미터 업데이트가 메인 스레드의 `Tick` 함수에 의존하고 있어, 이펙트와 소환 로직이 동시에 실행될 때 CPU 병목 현상이 일어났습니다.
+* **🟢 해결 방법 (Timeline Component & Event-Driven):**
+  * **비동기 연출 제어:** 매 프레임 실행되는 `Tick` 연산을 제거하고, **`TimelineComponent`**를 활용하여 디졸브 연출을 비동기적으로 보간(Interpolation) 처리하여 메인 스레드 부하를 줄였습니다.
+  * **이벤트 기반 소환:** 어트리뷰트 변화를 감지하는 델리게이트를 통해 페이즈 전환 시점에만 단 한 번 소환 이벤트가 발생하도록 제어했습니다.
+* **✨ 결과:** 대규모 연출 중에도 메인 스레드 오버헤드를 대폭 줄여 안정적인 60프레임을 방어할 수 있었습니다.
