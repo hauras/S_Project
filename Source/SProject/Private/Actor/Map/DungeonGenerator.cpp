@@ -112,7 +112,6 @@ void ADungeonGenerator::Tick(float DeltaTime)
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!PC || !PC->GetPawn()) return;
 
-	// 함수를 사용하여 현재 플레이어의 그리드 위치를 한 줄로 가져옴
 	FIntPoint CurrentGridPos = GetGridCoordsFromWorldLocation(PC->GetPawn()->GetActorLocation());
 
 	if (CurrentGridPos != LastPlayerGridPos)
@@ -129,17 +128,15 @@ void ADungeonGenerator::UpdateRoomVisibility(FIntPoint CurrentGridPos)
 		ULevelStreamingDynamic* LevelInstance = Pair.Key;
 		FRoomData& Data = Pair.Value;
 
-		// [수정] 맨해튼 거리 계산 (변수명 수정)
 		int32 Dist = FMath::Abs(Data.GridLocation.X - CurrentGridPos.X) + FMath::Abs(Data.GridLocation.Y - CurrentGridPos.Y);
 
-		// 거리가 1 이하인 방들만 렌더링하도록 설정합니다.
 		if (Dist <= 1)
 		{
 			LevelInstance->SetShouldBeVisible(true);
 		}
 		else
 		{
-			LevelInstance->SetShouldBeVisible(false); // 화면에서 가림 (VRAM 절약)
+			LevelInstance->SetShouldBeVisible(false); 
 		}
 	}
 }
@@ -261,7 +258,6 @@ void ADungeonGenerator::OnRoomLevelShown()
 
 		if (StreamingLevel && StreamingLevel->IsLevelLoaded() && StreamingLevel->GetLoadedLevel())
 		{
-			// 여기서 함수를 호출할 때 이름을 확인하세요.
 			InitializeRoom(StreamingLevel, Data);
 			return; 
 		}
